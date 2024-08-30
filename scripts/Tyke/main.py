@@ -58,10 +58,19 @@ def vcf_number_variants(input_vcf_file, input_bam_file, refs, outfile):
             #     continue
             chromosome = v.chrom
             start_position = v.start
-            variant_seq = v.alts[0]
-            variant_len = len(variant_seq)
-            end_position = start_position + variant_len
-            #print(start_position,end_position)
+            print(v.info.get('AF'))
+            print(v.info.get('SVLEN'))
+            if var_type =='DEL':
+                end_position = start_position + abs(v.info.get('SVLEN'))
+                print(start_position,end_position)
+                variant_len=abs(v.info.get('SVLEN'))
+                variant_seq=""
+            else:
+                
+                variant_seq = v.alts[0]
+                variant_len = len(variant_seq)
+                end_position = start_position + variant_len
+                #print(start_position,end_position)
             #svtype = "INS"
             #variant_len = 100
             #variant_seq = 'T' * variant_len
@@ -70,8 +79,9 @@ def vcf_number_variants(input_vcf_file, input_bam_file, refs, outfile):
             for read in bamfile.fetch(chromosome, start_position, end_position):
                 if read.query_sequence is not None and read.flag == 0 and read.query_name not in processed_read_ids:
                     variant_reads.append(read)
-            print(v.info.get('AF'))
-            no_reads = max(1, math.ceil(len(variant_reads) * float(v.info.get('AF')[0])))
+
+            no_reads = max(1, math.ceil(float(len(variant_reads)) * float(v.info.get('AF')[0])))
+            print(no_reads, len(variant_reads))
             if no_reads > len(variant_reads):
                 #print(f"Coverage {len(variant_reads)} is below required minimum reads for variant {chromosome}:{start_position} AF {obj.AF}")
                 continue
@@ -80,9 +90,13 @@ def vcf_number_variants(input_vcf_file, input_bam_file, refs, outfile):
             #print(f"{obj.DR}AF={obj.AF},SVTYPE={obj.SVTYPE},CHROMOE={obj.CHROM},POS={obj.POS},SV_LENGTH={obj.SVLEN},SV={obj.ALT}")
             ref_seq = refs[read.reference_name]
             num_reads_edited = 0
+            mos_counter=0
+            norm_counter=0
             for read in variant_reads:
                 read_edited = False
                 if num_reads_edited < no_reads:
+                    mos_counter+=1
+                    num_reads_edited += 1
                     new_seq, new_qual = edit_read(ref_seq, read.reference_start, read.query_sequence, read.query_qualities, 
                                                   read.cigartuples, start_position, variant_len, var_type, variant_seq)
                     if new_seq:
@@ -90,11 +104,13 @@ def vcf_number_variants(input_vcf_file, input_bam_file, refs, outfile):
                         #query_name = f"{read.query_name}|{read.reference_name}|{start_position}|{svtype}|{variant_len}"
                         query_name = read.query_name
                         write_fastx_record(out_fh, query_name, new_seq, new_qual)
-                        num_reads_edited += 1
+                        
                         read_edited = True
                         processed_read_ids.add(read.query_name)
-                #if not read_edited:
-                #    write_fastx_record(out_fh, read.query_name, read.query_sequence, read.query_qualities)
+                if not read_edited:
+                    norm_counter+=1
+                    write_fastx_record(out_fh, read.query_name, read.query_sequence, read.query_qualities)
+            print("mos+&norm",mos_counter,norm_counter)
             if num_reads_edited != no_reads:
                 print("Could not fulfill required minimum edited reads for variant at {chromosome}:{start_position}:{end_position} type {svtype}")
 
