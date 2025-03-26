@@ -125,7 +125,7 @@ def get_chrom_lengths(bam_path, ref_chroms=CHROMS):
 def genlocSNV(num,bam_path,mincov=20):
     from numpy import random as nran
     from pysam import depth
-    
+    npseed(seed)
     chromol, chrom = get_chrom_lengths(bam_path)
     locations=[]
     for i in range(num):
@@ -144,7 +144,7 @@ def genlocSNV(num,bam_path,mincov=20):
 def genlocSV(num,bam_path,mincov=20):
     from numpy import random as nran
     from pysam import depth
-
+    npseed(seed)
     chromol, chrom = get_chrom_lengths(bam_path)
     locations=[]
     for i in range(num):
@@ -164,8 +164,9 @@ def genlocSV(num,bam_path,mincov=20):
     return tuple(locations)
 
 def genseq(minl,maxl):
-    nucl=tuple(["A","T","C","G"])
     from numpy.random import choice
+    npseed(seed)
+    nucl=tuple(["A","T","C","G"])
     res=''
     for i in range(choice(range(minl,maxl+1))):
         res+=choice(nucl)
@@ -173,6 +174,7 @@ def genseq(minl,maxl):
 
 def gensnps(maxsnvl=maxsnvl,sub=sub,insdelsnv=insdelsnv, snplist=[]):
     from numpy.random import choice
+    npseed(seed)
     result=[]
     nucl=["A","T","C","G"]
     for i in range(len(snplist)):
@@ -237,6 +239,8 @@ def main():
     from numpy.random import choice
     from numpy.random import uniform
     from numpy.random import seed as npseed
+    npseed(seed)
+
     svloc=genlocSV(numsv,bam_path,ceil(1/minAFsv))
     snvloc=genlocSNV(numsnv,bam_path,ceil(1/minAFsnv))
     
