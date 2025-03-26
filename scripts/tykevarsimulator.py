@@ -2,6 +2,10 @@ import sys
 import pysam
 import argparse
 import os
+import numpy as np
+from numpy.random import choice, uniform, seed as npseed
+from numpy import random as nran
+from math import ceil
 
 # Initialize parser
 parser = argparse.ArgumentParser(description="TykeVarSimulator: A tool for simulating variants")
@@ -123,8 +127,6 @@ def get_chrom_lengths(bam_path, ref_chroms=CHROMS):
     return chromol, tuple(chromol.keys())
 
 def genlocSNV(num,bam_path,mincov=20):
-    from numpy import random as nran
-    from pysam import depth
     npseed(seed)
     chromol, chrom = get_chrom_lengths(bam_path)
     locations=[]
@@ -142,8 +144,6 @@ def genlocSNV(num,bam_path,mincov=20):
     return tuple(locations)
 
 def genlocSV(num,bam_path,mincov=20):
-    from numpy import random as nran
-    from pysam import depth
     npseed(seed)
     chromol, chrom = get_chrom_lengths(bam_path)
     locations=[]
@@ -164,7 +164,6 @@ def genlocSV(num,bam_path,mincov=20):
     return tuple(locations)
 
 def genseq(minl,maxl):
-    from numpy.random import choice
     npseed(seed)
     nucl=tuple(["A","T","C","G"])
     res=''
@@ -173,7 +172,6 @@ def genseq(minl,maxl):
     return res
 
 def gensnps(maxsnvl=maxsnvl,sub=sub,insdelsnv=insdelsnv, snplist=[]):
-    from numpy.random import choice
     npseed(seed)
     result=[]
     nucl=["A","T","C","G"]
@@ -235,11 +233,6 @@ def getrefsnp(reffile,snplist=1):
 
 
 def main():
-    from math import ceil
-    from numpy.random import choice
-    from numpy.random import uniform
-    from numpy.random import seed as npseed
-    npseed(seed)
 
     svloc=genlocSV(numsv,bam_path,ceil(1/minAFsv))
     snvloc=genlocSNV(numsnv,bam_path,ceil(1/minAFsnv))
