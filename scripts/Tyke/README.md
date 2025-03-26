@@ -2,11 +2,69 @@
 
 ## Installation
 
-This tool is written fully in python. To install the relevant dependencies, run
+These instructions are valid for **Linux x86**. For other platforms (e.g. MacOS), instructions will need to be adapted.
+
+Load conda, e.g.
 ```
+module load miniconda/3
+```
+or (in some instances python has to be loaded to run the conda command)
+```
+module load anaconda3/2024.02
+module load python
+```
+
+Installing two conda environments with python 3.10
+```
+conda create -n MosaicSim python=3.10
+conda init
+conda activate mosaicSim
+```
+
+Unload python if previously loaded so that python 3.10 from conda environment will be used
+```
+module unload python
+```
+
+Obtain the tool from github (replace $HOME with your preferred installation director)
+```
+cd  $HOME
+git clone https://github.com/erikstricker/MosaicSim.git
+```
+
+To install the relevant python dependencies, run
+```
+REPO_ROOT="$HOME/SpikeVarTykeVar/"
+
 pip install -r $REPO_ROOT/requirements.txt
 ```
-where `$REPO_ROOT` is the root folder of the repository.
+Ensure to also load samtools >1.15.1 and bcftools>1.19
+
+Once the requirements are installed, please install or load the following additional packages
+
+_Installation_
+```
+conda install -c bioconda samtools bcftools
+```
+_Loading (e.g.)_
+```
+export PATH=/path/to/software/samtools/samtools-1.21/bin:$PATH
+export PATH=/path/to/software/bcftools/bcftools-1.19/bin:$PATH
+```
+or
+```
+module load samtools-1.21
+module load bcftools-1.19
+```
+
+## Dependencies
+  
+### TykeVar
+- pysam (0.21.0) 
+- numpy (1.25.2)
+- biopython (1.81)
+- samtools 1.15.1
+- bcftools 1.19
 
 ## How to use it
 
