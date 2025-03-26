@@ -133,7 +133,7 @@ Last the re-genotyped VCF is filtered according to the VAF with a small Python s
 
 ### TykeVar
 
-Once the Python dependencies are installed, the scripts can be run directly from the `scripts/Tyke` subfolder.
+Once the Python dependencies are installed, the scripts can be run directly from the `scripts` subfolder.
 
 #### 0) TykeVar Prep
 
