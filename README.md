@@ -43,7 +43,7 @@ Unload python if previously loaded so that python 3.10 from conda environment wi
 module unload python
 ```
 
-Obtain the tool from github (replace $HOME with your preferred installation director)
+Obtain the MosaicSim from github (replace $HOME with your preferred installation director)
 ```
 cd  $HOME
 git clone https://github.com/erikstricker/MosaicSim.git
