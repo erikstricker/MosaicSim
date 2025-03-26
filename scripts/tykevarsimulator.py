@@ -236,8 +236,6 @@ def main():
     from numpy.random import choice
     from numpy.random import uniform
     from numpy.random import seed as npseed
-    if seed.isdigit()==1:
-        npseed(int(seed))
     svloc=genlocSV(numsv,bam_path,ceil(1/minAFsv))
     snvloc=genlocSNV(numsnv,bam_path,ceil(1/minAFsnv))
     
