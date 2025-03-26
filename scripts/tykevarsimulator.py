@@ -1,6 +1,7 @@
 import sys
 import pysam
 import argparse
+import os
 
 # Initialize parser
 parser = argparse.ArgumentParser(description="TykeVarSimulator: A tool for simulating variants")
@@ -292,6 +293,10 @@ def main():
             dellen=choice(range(minsvl,maxsvl))
             vcfsv.append(str(i[0])+"\t"+str(i[1])+"\tHackDel"+str(delnum)+"\tN\t<DEL>\t60\tPASS\tPRECISE;SVTYPE=DEL;SVLEN=-"+str(dellen)+";END="+str(int(i[1])+dellen)+";AF="+str(round(uniform(minAFsv,maxAFsv),2))+"\tGT:GQ\t0/0:60")
             delnum+=1
+
+    # Ensure parent directories exist
+    os.makedirs(os.path.dirname(output_prefix), exist_ok=True)
+
     with open(SVvcf,"w") as f:
         for i in tuple(vcfsv)[:-1]:
             f.write(i+'\n')
