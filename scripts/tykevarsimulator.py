@@ -1,5 +1,6 @@
 import sys
 import pysam
+from pysam import depth
 import argparse
 import os
 import numpy as np
