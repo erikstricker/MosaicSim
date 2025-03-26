@@ -48,70 +48,60 @@ if args.seed is None:
 else:
     seed=args.seed
 
-if args.minAFsv is None:
+if args.minimum_allele_frequency_sv is None:
     minAFsv=0.01 # minimum allele frequency SV 
 else:
-    minAFsv=args.minAFsv   
+    minAFsv=args.minimum_allele_frequency_sv  
 
-if args.maxAFsv is None:
+if args.maximum_allele_frequency_sv is None:
     maxAFsv=0.05  # maximum allele frequency SV
 else:
-    maxAFsv=args.maxAFsv  
+    maxAFsv=args.maximum_allele_frequency_sv 
 
-if args.minAFsnv is None:
+if args.minimum_allele_frequency_snv is None:
     minAFsnv=0.01 # minimum allele frequency SNV 
 else:
-    minAFsnv=args.minAFsnv   
+    minAFsnv=args.minimum_allele_frequency_snv  
 
-if args.maxAFsnv is None:
+if args.maximum_allele_frequency_snv is None:
     maxAFsnv=0.05  # maximum allele frequency SNV
 else:
-    maxAFsnv=args.maxAFsnv  
+    maxAFsnv=args.maximum_allele_frequency_snv 
 
-if args.numsv is None:
+if args.number_of_svs is None:
     numsv=50  # number of SVs to simulate
 else:
-    numsv=args.numsv 
+    numsv=args.number_of_svs 
 
-if args.numsv is None:
-    numsv=50  # number of SVs to simulate
-else:
-    numsv=args.numsv 
-
-if args.numsnv is None:
+if args.number_of_snvs is None:
     numsnv=200  # number of SNVs to simulate
 else:
-    numsnv=args.numsnv 
+    numsnv=args.number_of_snvs  
 
-if args.numsnv is None:
-    numsnv=200  # number of SNVs to simulate
-else:
-    numsnv=args.numsnv 
-
-if args.minsvl is None:
+if args.minimum_sv_length is None:
     minsvl=50  # minimum SV length
 else:
-    minsvl=args.minsvl 
+    minsvl=args.minimum_sv_length 
 
-if args.maxsvl is None:
+if args.maximum_sv_length is None:
     maxsvl=10000  # maximum SV length
 else:
-    maxsvl=args.maxsvl 
+    maxsvl=args.maximum_sv_length 
 
-if args.sub is None:
+if args.substitution_rate is None:
     sub=1  # probability of producing a SNP vs indel in SNV
 else:
-    sub=args.sub 
+    sub=args.substitution_rate 
 
-if args.insdelsnv is None:
+if args.insdel_snv_rate is None:
     insdelsnv=0.5  # probability of producing INS vs DEL in SNV
 else:
-    insdelsnv=args.insdelsnv 
+    insdelsnv=args.insdel_snv_rate 
 
-if args.insdel is None:
+if args.insdel_sv_rate is None:
     insdel=0.7  # probability of producing INS vs DEL in SV
 else:
-    insdel=args.insdel 
+    insdel=args.insdel_sv_rate 
 
 
 SVvcf=f"{output_prefix}_SV.vcf" # name of output vcf file for SV
