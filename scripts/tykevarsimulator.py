@@ -6,7 +6,7 @@ import os
 import numpy as np
 from numpy.random import choice, uniform, seed as npseed
 from numpy import random as nran
-from math import ceil
+from math import ceil, log
 
 # Initialize parser
 parser = argparse.ArgumentParser(description="TykeVarSimulator: A tool for simulating variants")
@@ -238,89 +238,91 @@ def main():
     svloc=genlocSV(numsv,bam_path,ceil(1/minAFsv))
     snvloc=genlocSNV(numsnv,bam_path,ceil(1/minAFsnv))
     
-    #print(snvloc)
-    vcfsv=[
-        '##fileformat=VCFv4.2',
-        '##ALT=<ID=INS,Description="Insertion">',
-        '##ALT=<ID=DEL,Description="Deletion">',
-        '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
-        '##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype quality">',
-        '##FILTER=<ID=PASS,Description="All filters passed">',
-        '##INFO=<ID=PRECISE,Number=0,Type=Flag,Description="Structural variation with precise breakpoints">',
-        '##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variation">',
-        '##INFO=<ID=SVLEN,Number=1,Type=Integer,Description="Length of structural variation">',
-        '##INFO=<ID=END,Number=1,Type=Integer,Description="End position of structural variation">',
-        '##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">',
-        '##contig=<ID=chr1,length=248956422>',
-        '##contig=<ID=chr2,length=242193529>',
-        '##contig=<ID=chr3,length=198295559>',
-        '##contig=<ID=chr4,length=190214555>',
-        '##contig=<ID=chr5,length=181538259>',
-        '##contig=<ID=chr6,length=170805979>',
-        '##contig=<ID=chr7,length=159345973>',
-        '##contig=<ID=chr8,length=145138636>',
-        '##contig=<ID=chr9,length=138394717>',
-        '##contig=<ID=chr10,length=133797422>',
-        '##contig=<ID=chr11,length=135086622>',
-        '##contig=<ID=chr12,length=133275309>',
-        '##contig=<ID=chr13,length=114364328>',
-        '##contig=<ID=chr14,length=107043718>',
-        '##contig=<ID=chr15,length=101991189>',
-        '##contig=<ID=chr16,length=90338345>',
-        '##contig=<ID=chr17,length=83257441>',
-        '##contig=<ID=chr18,length=80373285>',
-        '##contig=<ID=chr19,length=58617616>',
-        '##contig=<ID=chr20,length=64444167>',
-        '##contig=<ID=chr21,length=46709983>',
-        '##contig=<ID=chr22,length=50818468>',
-        '##contig=<ID=chrX,length=156040895>',
-        '##contig=<ID=chrY,length=57227415>',
-        '##contig=<ID=chrM,length=16569>',
-        '\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE'])
-    ]
-    insertnum=1
-    delnum=1
-    for i in svloc:
-        draw = choice(tuple(['in','del']), 1, p=[insdel,1-insdel])    
-        if draw=='in':
-            seq=genseq(minsvl,maxsvl)
-            vcfsv.append(str(i[0])+"\t"+str(i[1])+"\tHackIns"+str(insertnum)+"\tN\t"+seq+"\t60\tPASS\tPRECISE;SVTYPE=INS;SVLEN="+str(len(seq))+";END="+str(int(i[1])+1)+";AF="+str(round(uniform(minAFsv,maxAFsv),2))+"\tGT:GQ\t0/0:60")
-            #PRECISE;SVTYPE=INS;SVLEN=333;END=748218 AF \t GT:GQ:DR:DV \t	0/0:28:28:5
-            insertnum+=1
-        else:
-            dellen=choice(range(minsvl,maxsvl))
-            vcfsv.append(str(i[0])+"\t"+str(i[1])+"\tHackDel"+str(delnum)+"\tN\t<DEL>\t60\tPASS\tPRECISE;SVTYPE=DEL;SVLEN=-"+str(dellen)+";END="+str(int(i[1])+dellen)+";AF="+str(round(uniform(minAFsv,maxAFsv),2))+"\tGT:GQ\t0/0:60")
-            delnum+=1
+    if numsv > 0:
+        #print(snvloc)
+        vcfsv=[
+            '##fileformat=VCFv4.2',
+            '##ALT=<ID=INS,Description="Insertion">',
+            '##ALT=<ID=DEL,Description="Deletion">',
+            '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+            '##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype quality">',
+            '##FILTER=<ID=PASS,Description="All filters passed">',
+            '##INFO=<ID=PRECISE,Number=0,Type=Flag,Description="Structural variation with precise breakpoints">',
+            '##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variation">',
+            '##INFO=<ID=SVLEN,Number=1,Type=Integer,Description="Length of structural variation">',
+            '##INFO=<ID=END,Number=1,Type=Integer,Description="End position of structural variation">',
+            '##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">',
+            '##contig=<ID=chr1,length=248956422>',
+            '##contig=<ID=chr2,length=242193529>',
+            '##contig=<ID=chr3,length=198295559>',
+            '##contig=<ID=chr4,length=190214555>',
+            '##contig=<ID=chr5,length=181538259>',
+            '##contig=<ID=chr6,length=170805979>',
+            '##contig=<ID=chr7,length=159345973>',
+            '##contig=<ID=chr8,length=145138636>',
+            '##contig=<ID=chr9,length=138394717>',
+            '##contig=<ID=chr10,length=133797422>',
+            '##contig=<ID=chr11,length=135086622>',
+            '##contig=<ID=chr12,length=133275309>',
+            '##contig=<ID=chr13,length=114364328>',
+            '##contig=<ID=chr14,length=107043718>',
+            '##contig=<ID=chr15,length=101991189>',
+            '##contig=<ID=chr16,length=90338345>',
+            '##contig=<ID=chr17,length=83257441>',
+            '##contig=<ID=chr18,length=80373285>',
+            '##contig=<ID=chr19,length=58617616>',
+            '##contig=<ID=chr20,length=64444167>',
+            '##contig=<ID=chr21,length=46709983>',
+            '##contig=<ID=chr22,length=50818468>',
+            '##contig=<ID=chrX,length=156040895>',
+            '##contig=<ID=chrY,length=57227415>',
+            '##contig=<ID=chrM,length=16569>',
+            '\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE'])
+        ]
+        insertnum=1
+        delnum=1
+        for i in svloc:
+            draw = choice(tuple(['in','del']), 1, p=[insdel,1-insdel])    
+            if draw=='in':
+                seq=genseq(minsvl,maxsvl)
+                vcfsv.append(str(i[0])+"\t"+str(i[1])+"\tHackIns"+str(insertnum)+"\tN\t"+seq+"\t60\tPASS\tPRECISE;SVTYPE=INS;SVLEN="+str(len(seq))+";END="+str(int(i[1])+1)+";AF="+str(round(uniform(minAFsv,maxAFsv),2))+"\tGT:GQ\t0/0:60")
+                #PRECISE;SVTYPE=INS;SVLEN=333;END=748218 AF \t GT:GQ:DR:DV \t	0/0:28:28:5
+                insertnum+=1
+            else:
+                dellen=choice(range(minsvl,maxsvl))
+                vcfsv.append(str(i[0])+"\t"+str(i[1])+"\tHackDel"+str(delnum)+"\tN\t<DEL>\t60\tPASS\tPRECISE;SVTYPE=DEL;SVLEN=-"+str(dellen)+";END="+str(int(i[1])+dellen)+";AF="+str(round(uniform(minAFsv,maxAFsv),2))+"\tGT:GQ\t0/0:60")
+                delnum+=1
 
-    # Ensure parent directories exist
-    os.makedirs(os.path.dirname(output_prefix), exist_ok=True)
+        # Ensure parent directories exist
+        os.makedirs(os.path.dirname(output_prefix), exist_ok=True)
 
-    with open(SVvcf,"w") as f:
-        for i in tuple(vcfsv)[:-1]:
-            f.write(i+'\n')
-        f.write(tuple(vcfsv)[-1])
-    f.close()
-    vcfsnv=[
-        '##fileformat=VCFv4.2',
-        '##FILTER=<ID=PASS,Description="All filters passed">',
-        '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
-        '##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Read depth for each allele">',
-        '##FORMAT=<ID=DV,Number=1,Type=Integer,Description="Number of variant reads">',
-        '##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">',
-        '\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE'])
-    ]
-    snps=getrefsnp(ref_path,snvloc)
-    
-    from math import log
-    
-    for i in gensnps(maxsnvl=maxsnvl,sub=sub, snplist=snps):
-        AFnum=(round(uniform(minAFsnv,maxAFsnv),2))
-        readnum=ceil(AFnum*i[2])
-        vcfsnv.append(str(i[0])+'\t'+str(i[1])+'\t.\t'+str(i[3])+'\t'+str(i[4])+"\t1500\tPASS\tAF="+str(AFnum)+"\tGT:AD:DV\t0/0:"+str(i[2]-readnum)+":"+str(readnum))
-    with open(SNVvcf,"w") as f:
-        for i in tuple(vcfsnv)[:-1]:
-            f.write(i+'\n')
-        f.write(tuple(vcfsnv)[-1])
-    f.close()
+        with open(SVvcf,"w") as f:
+            for i in tuple(vcfsv)[:-1]:
+                f.write(i+'\n')
+            f.write(tuple(vcfsv)[-1])
+        f.close()
+
+    if numsnv > 0:
+        vcfsnv=[
+            '##fileformat=VCFv4.2',
+            '##FILTER=<ID=PASS,Description="All filters passed">',
+            '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+            '##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Read depth for each allele">',
+            '##FORMAT=<ID=DV,Number=1,Type=Integer,Description="Number of variant reads">',
+            '##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">',
+            '\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE'])
+        ]
+        snps=getrefsnp(ref_path,snvloc)
+        
+        
+        for i in gensnps(maxsnvl=maxsnvl,sub=sub, snplist=snps):
+            AFnum=(round(uniform(minAFsnv,maxAFsnv),2))
+            readnum=ceil(AFnum*i[2])
+            vcfsnv.append(str(i[0])+'\t'+str(i[1])+'\t.\t'+str(i[3])+'\t'+str(i[4])+"\t1500\tPASS\tAF="+str(AFnum)+"\tGT:AD:DV\t0/0:"+str(i[2]-readnum)+":"+str(readnum))
+        with open(SNVvcf,"w") as f:
+            for i in tuple(vcfsnv)[:-1]:
+                f.write(i+'\n')
+            f.write(tuple(vcfsnv)[-1])
+        f.close()
 if __name__=="__main__":
     main()
