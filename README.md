@@ -54,9 +54,8 @@ To install the relevant python dependencies, run
 REPO_ROOT="$HOME/SpikeVarTykeVar/"
 
 pip install -r $REPO_ROOT/requirements.txt
-conda install -c bioconda mosdepth
 ```
-Ensure to also load samtools >1.15.1 and bcftools 
+Ensure to also load mosdepth>0.3.2 (for SpikeVar), samtools >1.15.1, and bcftools>1.19
 
 Once the requirements are installed, please install or load the following additional packages
 
