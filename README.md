@@ -40,7 +40,7 @@ conda activate mosaicSim
 
 Unload python if previously loaded so that python 3.10 from conda environment will be used
 ```
-module load python
+module unload python
 ```
 
 Obtain the tool from github (replace $HOME with your preferred installation director)
@@ -73,8 +73,8 @@ export PATH=/path/to/software/bcftools/bcftools-1.19/bin:$PATH
 or
 ```
 module load mosdepth-0.3.2
-module loadsamtools-1.21
-module loadbcftools-1.19
+module load samtools-1.21
+module load bcftools-1.19
 ```
 
 ## Dependencies
@@ -136,23 +136,50 @@ Last the re-genotyped VCF is filtered according to the VAF with a small Python s
 
 Once the Python dependencies are installed, the scripts can be run directly from the `scripts/Tyke` subfolder.
 
+#### 0) TykeVar Prep
+
+Before getting started ensure that:
+* The input file is in bam format with corresponding index (.bai) file
+* The corresponding fasta reference file is downloaded with appropriate index (.fai) file
+
 #### 1) TykeVarSimulator - Generate Simulated VCF
 
-<img src="images/TykeVarSimulator.png"  height="130" align="right">
+<img src="images/TykeVarSimulator.png" height="130" align="right">
 
+The **TykeVarSimulator** generates a random set of mosaic variants, including **single nucleotide variants (SNVs)** and **structural variants (SVs)**. These variants can be customized by adjusting parameters such as **variant allele frequency (VAF)**, **the number of variants to simulate**, and **variant size**.
 
-The VCF simulator generates a random set of mosaic variants (SNVs and SVs). The variants
-can be parameterized with VAF, the number of variants to simulate, and the size of the variations.
-The generated file is in the Sniffles VCF format.
+The output is a **VCF file in Sniffles format**, which serves as:  
+- **Input** for the read editor step (described below) to modify sequencing reads by inserting the simulated variants.  
+- **Ground truth** for evaluating mosaic variant callers.  
 
-The variants generated here act as an input into the read editor step (described below) which
-produces modified reads with the variants inserted into them. The same VCF file is also the
-ground truth for evaluating mosaic variant callers.
-
+## Usage
+```bash
+python tykevarsimulator.py -i <path_to_bam> -T <path_to_ref> -o <output_path_prefix> [optional arguments]
 ```
-python vcfgen.py <path_to_bam> <path_to_ref> <output_path_prefix>
 
-```
+## Required Parameters  
+| Parameter | Description |
+|-----------|-------------|
+| `-i, --input` | Path to the **input BAM file** containing sequencing reads. |
+| `-T, --reference` | Path to the **reference genome FASTA file**. |
+| `-o, --output` | Prefix for the **output files** (e.g., VCF files for simulated SNVs and SVs). |
+
+## Optional Parameters  
+| Parameter | Description | Default Value |
+|-----------|-------------|---------------|
+| `-s, --seed` | **Random seed** for reproducibility. If not set, the results will vary between runs. | `0` |
+| `-minAFsv, --minimum-allele-frequency-sv` | **Minimum allele frequency** for simulated **structural variants (SVs)**. | `0.01` |
+| `-maxAFsv, --maximum-allele-frequency-sv` | **Maximum allele frequency** for **SVs**. | `0.05` |
+| `-minAFsnv, --minimum-allele-frequency-snv` | **Minimum allele frequency** for **single nucleotide variants (SNVs)**. | `0.01` |
+| `-maxAFsnv, --maximum-allele-frequency-snv` | **Maximum allele frequency** for **SNVs**. | `0.05` |
+| `-numsv, --number-of-svs` | Number of **structural variants (SVs)** to simulate. | `50` |
+| `-numsnv, --number-of-snvs` | Number of **single nucleotide variants (SNVs)** to simulate. | `200` |
+| `-minsvl, --minimum-sv-length` | **Minimum length** of simulated **SVs** (in base pairs). | `50` |
+| `-maxsvl, --maximum-sv-length` | **Maximum length** of simulated **SVs** (in base pairs). | `10,000` |
+| `-sub, --substitution-rate` | **Probability of generating a SNP** versus an indel (in SNVs). A value of **1.0** means only SNPs will be generated. | `1.0` |
+| `-insdelsnv, --insdel-snv-rate` | **Probability of generating an insertion vs. a deletion** in SNVs. A value of **0.5** means equal chances of insertion and deletion. | `0.5` |
+| `-insdel, --insdel-sv-rate` | **Probability of generating an insertion vs. a deletion** in SVs. A value of **0.7** means insertions are more likely than deletions. | `0.7` |
+
 
 #### 2) TykeVarEditor - Generate Edited Reads Based on Simulated VCF
 
@@ -251,7 +278,7 @@ Your spiked in reads are now visible in the IGV genome browser.
 Here, we use the TykeVar workflow to modify reads of HG002 directly at their reference position by including artificial mutations. To demonstrate the wide application of this tool, we generate a random distribution of allele frequencies between 1% and 40%. In contrast to the above approach, we do not introduce new haplotypes with this. However, more complex mutations (e.g. rearrangements, duplication, or very long structural variants) will not be able to be introduced to the data itself, since the size of the reads is limited.
 
 
-#### 1) Fetch Data
+#### 0) Fetch Data
 In order to simulate and edit reads, the pipeline first needs an initial set of aligned reads and a reference. For our demonstration, we will use the GIAB datasets.
 
 Reads - `ftp://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/Ultralong_OxfordNanopore/guppy-V3.2.4_2020-01-22/HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam` and `ftp://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/Ultralong_OxfordNanopore/guppy-V3.2.4_2020-01-22/HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam.bai`
@@ -263,17 +290,24 @@ We run the demonstration on chr22 only, so the dataset is filtered using
 samtools view HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam 22 > chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam
 ```
 
-#### 2) TykeVarSimulator - Generate Variants and Modified Reads
-
-First, we decompress the FASTA file.
+Then, we decompress the FASTA file.
 ```
 gunzip hs37d5.fa.gz -c hs37d5.fa
 ```
 
+#### 1) TykeVarSimulator - Generate Variants and Modified Reads
+
 Then we simulate variants
 ```
-python vcfgen.py chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam hs37d5.fa chr22
+## Example Usage
+```bash
+python tykevarsimulator.py -i chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam -T hs37d5.fa -o output_dir/chr22 -s 42
 ```
+
+This command:  
+- Uses `chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam` as input and `hs37d5.fa` as the reference genome.  
+- Outputs simulated VCFs to `output_dir/chr22`.  
+- Sets a **random seed of 42** for reproducibility.  
 
 #### 3) TykeVarEditor - Add Modified Reads Back In
 
