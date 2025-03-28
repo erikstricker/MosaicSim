@@ -151,19 +151,19 @@ The output is a **VCF file in Sniffles format**, which serves as:
 - **Input** for the read editor step (described below) to modify sequencing reads by inserting the simulated variants.  
 - **Ground truth** for evaluating mosaic variant callers.  
 
-## Usage
+##### Usage
 ```bash
 python tykevarsimulator.py -i <path_to_bam> -T <path_to_ref> -o <output_path_prefix> [optional arguments]
 ```
 
-## Required Parameters  
+##### Required Parameters  
 | Parameter | Description |
 |-----------|-------------|
 | `-i, --input` | Path to the **input BAM file** containing sequencing reads. |
 | `-T, --reference` | Path to the **reference genome FASTA file**. |
 | `-o, --output` | Prefix for the **output files** (e.g., VCF files for simulated SNVs and SVs). |
 
-## Optional Parameters  
+##### Optional Parameters  
 | Parameter | Description | Default Value |
 |-----------|-------------|---------------|
 | `-s, --seed` | **Random seed** for reproducibility. If not set, the results will vary between runs. | `0` |
@@ -182,17 +182,25 @@ python tykevarsimulator.py -i <path_to_bam> -T <path_to_ref> -o <output_path_pre
 
 #### 2) TykeVarEditor - Generate Edited Reads Based on Simulated VCF
 
-
-```
-python main.py -v <SIMULATED_VCF> -b <BAM> -r <REF> -o <OUTPUT_FASTQ>
-```
-
 <img src="images/TykeVarEditor.png"  height="200" align="right">
 
 This command above takes in the VCF which determines which variants to introduce into the reads.
 The BAM file is used to find the reads which overlap with variant locations. Only a subset of the reads
 corresponding to a particular variant location are edited. This is determined by the allele frequency.
-The output FASTQ file has the edited reads. The query name of each read is kept the same.
+The output BAM file retains the alignment info and now contains the edited reads. Also, the query name of each read is kept the same.
+
+##### Usage
+```bash
+python tykevareditor.py -v <simulated_vcf> -b <path_to_bam> -T <path_to_ref> -o <output_bam>
+```
+##### Required Parameters  
+| Parameter               | Description |
+|-------------------------|-------------|
+| `-v, --vcf_file`         | VCF file from TykeVarSimulator  (SNV or SV). |
+| `-b, --bam_file`         | Input BAM file. |
+| `-T, --ref_file`         | Reference genome file for BAM. |
+| `-o, --out_file`         | Output BAM file name and directory. |
+
 
 #### 3) TykeVarMerger - Re-Align Modified Reads and Merge Them
 
