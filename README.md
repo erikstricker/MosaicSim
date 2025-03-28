@@ -167,17 +167,17 @@ python tykevarsimulator.py -i <path_to_bam> -T <path_to_ref> -o <output_path_pre
 | Parameter | Description | Default Value |
 |-----------|-------------|---------------|
 | `-s, --seed` | **Random seed** for reproducibility. If not set, the results will vary between runs. | `0` |
-| `-minAFsv, --minimum-allele-frequency-sv` | **Minimum allele frequency** for simulated **structural variants (SVs)**. | `0.01` |
-| `-maxAFsv, --maximum-allele-frequency-sv` | **Maximum allele frequency** for **SVs**. | `0.05` |
-| `-minAFsnv, --minimum-allele-frequency-snv` | **Minimum allele frequency** for **single nucleotide variants (SNVs)**. | `0.01` |
-| `-maxAFsnv, --maximum-allele-frequency-snv` | **Maximum allele frequency** for **SNVs**. | `0.05` |
-| `-numsv, --number-of-svs` | Number of **structural variants (SVs)** to simulate. | `50` |
-| `-numsnv, --number-of-snvs` | Number of **single nucleotide variants (SNVs)** to simulate. | `200` |
-| `-minsvl, --minimum-sv-length` | **Minimum length** of simulated **SVs** (in base pairs). | `50` |
-| `-maxsvl, --maximum-sv-length` | **Maximum length** of simulated **SVs** (in base pairs). | `10,000` |
-| `-sub, --substitution-rate` | **Probability of generating a SNP** versus an indel (in SNVs). A value of **1.0** means only SNPs will be generated. | `1.0` |
-| `-insdelsnv, --insdel-snv-rate` | **Probability of generating an insertion vs. a deletion** in SNVs. A value of **0.5** means equal chances of insertion and deletion. | `0.5` |
-| `-insdel, --insdel-sv-rate` | **Probability of generating an insertion vs. a deletion** in SVs. A value of **0.7** means insertions are more likely than deletions. | `0.7` |
+| `-minAFsv, --minimum_allele_frequency_sv` | **Minimum allele frequency** for simulated **structural variants (SVs)**. | `0.01` |
+| `-maxAFsv, --maximum_allele_frequency_sv` | **Maximum allele frequency** for **SVs**. | `0.05` |
+| `-minAFsnv, --minimum_allele_frequency_snv` | **Minimum allele frequency** for **single nucleotide variants (SNVs)**. | `0.01` |
+| `-maxAFsnv, --maximum_allele_frequency_snv` | **Maximum allele frequency** for **SNVs**. | `0.05` |
+| `-numsv, --number_of_svs` | Number of **structural variants (SVs)** to simulate. | `50` |
+| `-numsnv, --number_of_snvs` | Number of **single nucleotide variants (SNVs)** to simulate. | `200` |
+| `-minsvl, --minimum_sv_length` | **Minimum length** of simulated **SVs** (in base pairs). | `50` |
+| `-maxsvl, --maximum_sv_length` | **Maximum length** of simulated **SVs** (in base pairs). | `10,000` |
+| `-sub, --substitution_rate` | **Probability of generating a SNP** versus an indel (in SNVs). A value of **1.0** means only SNPs will be generated. | `1.0` |
+| `-insdelsnv, --insdel_snv_rate` | **Probability of generating an insertion vs. a deletion** in SNVs. A value of **0.5** means equal chances of insertion and deletion. | `0.5` |
+| `-insdel, --insdel_sv_rate` | **Probability of generating an insertion vs. a deletion** in SVs. A value of **0.7** means insertions are more likely than deletions. | `0.7` |
 
 
 #### 2) TykeVarEditor - Generate Edited Reads Based on Simulated VCF
@@ -201,6 +201,10 @@ python tykevareditor.py -v <simulated_vcf> -b <path_to_bam> -T <path_to_ref> -o 
 | `-T, --ref_file`         | Reference genome file for BAM. |
 | `-o, --out_file`         | Output BAM file name and directory. |
 
+##### Optional Parameters  
+| Parameter | Description | Default Value |
+|-----------|-------------|---------------|
+| `-of, --output_format` | **Output format** can be either sorted bam file or unmapped fastq file. Fastq format has to converted into a mapped bam file with an aligner, while mapped reads in the bam file will directly replace existing reads at their original position. | `"bam"` |
 
 #### 3) TykeVarMerger - Re-Align Modified Reads and Merge Them
 
