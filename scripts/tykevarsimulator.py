@@ -19,20 +19,20 @@ parser.add_argument("-o", "--output", required=True, help="Output file prefix")
 
 # Optional arguments
 parser.add_argument("-s", "--seed", type=int, required=False, help="Seed for random number generation")
-parser.add_argument("-minAFsv", "--minimum-allele-frequency-sv", type=float, required=False, help="Minimum allele frequency for structural variants")
-parser.add_argument("-maxAFsv", "--maximum-allele-frequency-sv", type=float, required=False, help="Maximum allele frequency for structural variants")
-parser.add_argument("-minAFsnv", "--minimum-allele-frequency-snv", type=float, required=False, help="Minimum allele frequency for single nucleotide variants")
-parser.add_argument("-maxAFsnv", "--maximum-allele-frequency-snv", type=float, required=False, help="Maximum allele frequency for single nucleotide variants")
+parser.add_argument("-minAFsv", "--minimum_allele_frequency_sv", type=float, required=False, help="Minimum allele frequency for structural variants")
+parser.add_argument("-maxAFsv", "--maximum_allele_frequency_sv", type=float, required=False, help="Maximum allele frequency for structural variants")
+parser.add_argument("-minAFsnv", "--minimum_allele_frequency_snv", type=float, required=False, help="Minimum allele frequency for single nucleotide variants")
+parser.add_argument("-maxAFsnv", "--maximum_allele_frequency_snv", type=float, required=False, help="Maximum allele frequency for single nucleotide variants")
 
 # Newly added arguments
-parser.add_argument("-numsv", "--number-of-svs", type=int, required=False, help="Number of structural variants to simulate")
-parser.add_argument("-numsnv", "--number-of-snvs", type=int, required=False, help="Number of single nucleotide variants to simulate")
-parser.add_argument("-maxsnvl", "--maximum-snv-length", type=int, required=False, help="Maximum length of single nucleotide variants indels")
-parser.add_argument("-minsvl", "--minimum-sv-length", type=int, required=False, help="Minimum length of structural variants")
-parser.add_argument("-maxsvl", "--maximum-sv-length", type=int, required=False, help="Maximum length of structural variants")
-parser.add_argument("-sub", "--substitution-rate", type=float, required=False, help="Probability of producing a SNP vs indel in SNV")
-parser.add_argument("-insdelsnv", "--insdel-snv-rate", type=float, required=False, help="Probability of producing an insertion vs deletion in SNV")
-parser.add_argument("-insdel", "--insdel-sv-rate", type=float, required=False, help="Probability of producing an insertion vs deletion in SV")
+parser.add_argument("-numsv", "--number_of_svs", type=int, required=False, help="Number of structural variants to simulate")
+parser.add_argument("-numsnv", "--number_of_snvs", type=int, required=False, help="Number of single nucleotide variants to simulate")
+parser.add_argument("-maxsnvl", "--maximum_snv_length", type=int, required=False, help="Maximum length of single nucleotide variants indels")
+parser.add_argument("-minsvl", "--minimum_sv_length", type=int, required=False, help="Minimum length of structural variants")
+parser.add_argument("-maxsvl", "--maximum_sv_length", type=int, required=False, help="Maximum length of structural variants")
+parser.add_argument("-sub", "--substitution_rate", type=float, required=False, help="Probability of producing a SNP vs indel in SNV")
+parser.add_argument("-insdelsnv", "--insdel_snv_rate", type=float, required=False, help="Probability of producing an insertion vs deletion in SNV")
+parser.add_argument("-insdel", "--insdel_sv_rate", type=float, required=False, help="Probability of producing an insertion vs deletion in SV")
 
 # Parse arguments
 args = parser.parse_args()
