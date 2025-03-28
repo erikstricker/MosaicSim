@@ -7,6 +7,7 @@ import numpy as np
 from numpy.random import choice, uniform, seed as npseed
 from numpy import random as nran
 from math import ceil, log
+import random
 
 # Initialize parser
 parser = argparse.ArgumentParser(description="TykeVarSimulator: A tool for simulating variants")
@@ -240,6 +241,8 @@ def main():
     
     chromol, chrom = get_chrom_lengths(bam_path)
 
+    random.seed(seed)
+
     if numsv > 0:
         #print(snvloc)
         vcfsv=[
@@ -268,12 +271,12 @@ def main():
             draw = choice(tuple(['in','del']), 1, p=[insdel,1-insdel])    
             if draw=='in':
                 seq=genseq(minsvl,maxsvl)
-                vcfsv.append(str(i[0])+"\t"+str(i[1])+"\tHackIns"+str(insertnum)+"\tN\t"+seq+"\t60\tPASS\tPRECISE;SVTYPE=INS;SVLEN="+str(len(seq))+";END="+str(int(i[1])+1)+";AF="+str(round(uniform(minAFsv,maxAFsv),2))+"\tGT:GQ\t0/0:60")
+                vcfsv.append(str(i[0])+"\t"+str(i[1])+"\tHackIns"+str(insertnum)+"\tN\t"+seq+"\t60\tPASS\tPRECISE;SVTYPE=INS;SVLEN="+str(len(seq))+";END="+str(int(i[1])+1)+";AF="+str(round(random.uniform(minAFsv,maxAFsv),2))+"\tGT:GQ\t0/0:60")
                 #PRECISE;SVTYPE=INS;SVLEN=333;END=748218 AF \t GT:GQ:DR:DV \t	0/0:28:28:5
                 insertnum+=1
             else:
                 dellen=choice(range(minsvl,maxsvl))
-                vcfsv.append(str(i[0])+"\t"+str(i[1])+"\tHackDel"+str(delnum)+"\tN\t<DEL>\t60\tPASS\tPRECISE;SVTYPE=DEL;SVLEN=-"+str(dellen)+";END="+str(int(i[1])+dellen)+";AF="+str(round(uniform(minAFsv,maxAFsv),2))+"\tGT:GQ\t0/0:60")
+                vcfsv.append(str(i[0])+"\t"+str(i[1])+"\tHackDel"+str(delnum)+"\tN\t<DEL>\t60\tPASS\tPRECISE;SVTYPE=DEL;SVLEN=-"+str(dellen)+";END="+str(int(i[1])+dellen)+";AF="+str(round(random.uniform(minAFsv,maxAFsv),2))+"\tGT:GQ\t0/0:60")
                 delnum+=1
 
         # Ensure parent directories exist
@@ -284,6 +287,8 @@ def main():
                 f.write(i+'\n')
             f.write(tuple(vcfsv)[-1])
         f.close()
+
+    random.seed(seed)
 
     if numsnv > 0:
         vcfsnv=[
@@ -305,7 +310,7 @@ def main():
         
         
         for i in gensnps(maxsnvl=maxsnvl,sub=sub, snplist=snps):
-            AFnum=(round(uniform(minAFsnv,maxAFsnv),2))
+            AFnum=(round(random.uniform(minAFsnv,maxAFsnv),2))
             readnum=ceil(AFnum*i[2])
             vcfsnv.append(str(i[0])+'\t'+str(i[1])+'\t.\t'+str(i[3])+'\t'+str(i[4])+"\t1500\tPASS\tAF="+str(AFnum)+"\tGT:AD:DV\t0/0:"+str(i[2]-readnum)+":"+str(readnum))
         with open(SNVvcf,"w") as f:
