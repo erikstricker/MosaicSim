@@ -204,7 +204,7 @@ python tykevareditor.py -v <simulated_vcf> -b <path_to_bam> -T <path_to_ref> -o 
 ##### Optional Parameters  
 | Parameter | Description | Default Value |
 |-----------|-------------|---------------|
-| `-of, --output_format` | **Output format** can be either sorted bam file or unmapped fastq file. Fastq format has to converted into a mapped bam file with an aligner, while mapped reads in the bam file will directly replace existing reads at their original position. | `"bam"` |
+| `-of, --output_format` | **Output format** can be either sorted `bam` file or unmapped `fastq` file. Fastq format has to converted into a mapped bam file with an aligner, while mapped reads in the bam file will directly replace existing reads at their original position. | `"bam"` |
 
 #### 3) TykeVarMerger - Re-Align Modified Reads and Merge Them
 
