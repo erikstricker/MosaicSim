@@ -30,7 +30,7 @@ def argument_parser():
         help="bam file",
     )
     parser.add_argument(
-        "-r",
+        "-T",
         "--ref_file",
         type=str,
         help="Reference genome file for BAM",
@@ -39,7 +39,7 @@ def argument_parser():
         "-o",
         "--out_file",
         type=str,
-        help="Output fastq file",
+        help="Output bam file name and dir",
     )
 
     return parser.parse_args()
