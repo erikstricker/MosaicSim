@@ -10,8 +10,8 @@ from extract_read_bam_out import edit_read, read_ref, write_bam_record
 
 def argument_parser():
     parser = argparse.ArgumentParser(
-        description="Tyke var simulator",
-        prog="Tyke var simulator",
+        description="TykeVarEditor",
+        prog="TykeVarEditor",
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument(
@@ -19,7 +19,7 @@ def argument_parser():
         "--vcf_file",
         dest="vcf_file",
         type=str,
-        help="vcf file from vcf generator",
+        help="vcf file from TykeVarSimulator (SNV or SV)",
         required=True,
     )
     parser.add_argument(
