@@ -39,7 +39,7 @@ def argument_parser():
         "-o",
         "--out_file",
         type=str,
-        help="Output bam file name and dir",
+        help="Output file name and dir",
     )
     parser.add_argument(
         "-of",
@@ -225,13 +225,12 @@ def vcf_number_variants_fastq_out(input_vcf_file, input_bam_file, refs, outfile)
 
 def main():
     args=argument_parser()
-    print(args.bam_file)
     refs = read_ref(args.ref_file)
-    output_format = read_ref(args.output_format)
+    output_format = args.output_format
     if args.output_format is None:
         output_format = "bam"
     else:
-        output_format = read_ref(args.output_format)
+        output_format = args.output_format
 
     if output_format == "bam":
         vcf_number_variants_bam_out(args.vcf_file, args.bam_file, refs, args.out_file)
