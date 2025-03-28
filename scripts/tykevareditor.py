@@ -6,7 +6,7 @@ from vcf_line_parser import VCFLineSV
 import math
 import random
 
-from extract_read_bam_out import edit_read, read_ref, write_bam_record
+from extract_read_bam_out import edit_read, read_ref, write_fastx_record, write_bam_record
 
 def argument_parser():
     parser = argparse.ArgumentParser(
