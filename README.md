@@ -208,7 +208,7 @@ python tykevareditor.py -v <simulated_vcf> -b <path_to_bam> -T <path_to_ref> -o 
 
 #### 3) TykeVarMerger - Re-Align Modified Reads and Merge Them
 
-Replace the reads in the original dataset with the modified reads.
+Replace the reads in the original dataset with the modified reads. This step is time intensive so make sure to run it in a cluster environment for lage files.
 
 ##### Usage
 ```bash
