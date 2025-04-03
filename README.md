@@ -1,4 +1,4 @@
-# SpikeVar & TykeVar: Simulation of Mosaic Variants in Sequencing Data
+# SpikeVar & TweakVar: Simulation of Mosaic Variants in Sequencing Data
 
 **Hackathon team: Lead: Fritz Sedlazeck - Developers: Erik Stricker, Xinchang Zheng, Michal Izydorczyk, Chi-Lam Poon, Philippe Sanio, Farhang Jaryani, Joyjit Daw, Divya Kalra, Adam Alexander - Writers: Erik Stricker, Sontosh Deb**
 
@@ -15,7 +15,7 @@
 
 <img src="images/BackgroundMV.png"  style="width: auto; display: block; margin: auto;">
 
-In the context of individual genome comparison, mutations that appear within a small fraction of the population are considered rare variants[<sup>1</sup>](#1). When assessing a population of cells from a tissue of the same individual in turn, rare variants only present in a small fraction of the cells are defined as mosaic variants (MVs)[<sup>2</sup>](#2). Recent studies have shown that there is potential disease associations of for certain MVs[<sup>2</sup>](#2). However, MVs are challenging to detect because they are mixed in with data from the non-mutated cells and present in the same sequencing file. Therefore, several pipelines have been developed or adjusted to extract mosaic single nucleotide, structural or indel variants from whole genome sequencing data such as Sniffles[<sup>3</sup>](#3), DeepMosaic[<sup>4</sup>](#4), Mutect2[<sup>5</sup>](#5), DeepVariant[<sup>6</sup>](#6). To benchmark and validate the efficiency and accuracy of these methods, sequencing files with known MVs are necessary. We developed two simulation workflows called SpikeVar (*Sp*ike *i*n *K*nown *E*xogenous *Var*iants) and TykeVar (*T*ransform *Y*our *K*ey *E*ndogenous *Var*iants), which output sequencing read files with artificial MVs and a ground truth annotation file for the MVs. SpikeVar accomplishes this by spiking in real reads from a sample at user-defined ratio into the sequencing file from a second sample. In contrast, TykeVar creates a list of random mutations and modifies a fraction of existing reads to match the user-defined MV frequency.
+In the context of individual genome comparison, mutations that appear within a small fraction of the population are considered rare variants[<sup>1</sup>](#1). When assessing a population of cells from a tissue of the same individual in turn, rare variants only present in a small fraction of the cells are defined as mosaic variants (MVs)[<sup>2</sup>](#2). Recent studies have shown that there is potential disease associations of for certain MVs[<sup>2</sup>](#2). However, MVs are challenging to detect because they are mixed in with data from the non-mutated cells and present in the same sequencing file. Therefore, several pipelines have been developed or adjusted to extract mosaic single nucleotide, structural or indel variants from whole genome sequencing data such as Sniffles[<sup>3</sup>](#3), DeepMosaic[<sup>4</sup>](#4), Mutect2[<sup>5</sup>](#5), DeepVariant[<sup>6</sup>](#6). To benchmark and validate the efficiency and accuracy of these methods, sequencing files with known MVs are necessary. We developed two simulation workflows called SpikeVar (*Sp*ike *i*n *K*nown *E*xogenous *Var*iants) and TweakVar (*T*ransform *Y*our *K*ey *E*ndogenous *Var*iants), which output sequencing read files with artificial MVs and a ground truth annotation file for the MVs. SpikeVar accomplishes this by spiking in real reads from a sample at user-defined ratio into the sequencing file from a second sample. In contrast, TweakVar creates a list of random mutations and modifies a fraction of existing reads to match the user-defined MV frequency.
 
 
 ## Installation
@@ -51,7 +51,7 @@ git clone https://github.com/erikstricker/MosaicSim.git
 
 To install the relevant python dependencies, run
 ```
-REPO_ROOT="$HOME/SpikeVarTykeVar/"
+REPO_ROOT="$HOME/MosaicSim/"
 
 pip install -r $REPO_ROOT/requirements.txt
 ```
@@ -85,7 +85,7 @@ module load bcftools-1.19
 - Python 3.6.8
 - bcftools
   
-### TykeVar
+### TweakVar
 - pysam (0.21.0) 
 - numpy (1.25.2)
 - biopython (1.81)
@@ -131,21 +131,21 @@ Last the re-genotyped VCF is filtered according to the VAF with a small Python s
 ```
 #### 3) Run Your Favorite Mosaic Variant Caller and Compare Results
 
-### TykeVar
+### TweakVar
 
 Once the Python dependencies are installed, the scripts can be run directly from the `scripts` subfolder.
 
-#### 0) TykeVar Prep
+#### 0) TweakVar Prep
 
 Before getting started ensure that:
 * The input file is in bam format with corresponding index (.bai) file
 * The corresponding fasta reference file is downloaded with appropriate index (.fai) file
 
-#### 1) TykeVarSimulator - Generate Simulated VCF
+#### 1) TweakVarSimulator - Generate Simulated VCF
 
-<img src="images/TykeVarSimulator.png" height="130" align="right">
+<img src="images/TweakVarSimulator.png" height="130" align="right">
 
-The **TykeVarSimulator** generates a random set of mosaic variants, including **single nucleotide variants (SNVs)** and **structural variants (SVs)**. These variants can be customized by adjusting parameters such as **variant allele frequency (VAF)**, **the number of variants to simulate**, and **variant size**.
+The **TweakVarSimulator** generates a random set of mosaic variants, including **single nucleotide variants (SNVs)** and **structural variants (SVs)**. These variants can be customized by adjusting parameters such as **variant allele frequency (VAF)**, **the number of variants to simulate**, and **variant size**.
 
 The output is a **VCF file in Sniffles format**, which serves as:  
 - **Input** for the read editor step (described below) to modify sequencing reads by inserting the simulated variants.  
@@ -153,7 +153,7 @@ The output is a **VCF file in Sniffles format**, which serves as:
 
 ##### Usage
 ```bash
-python tykevarsimulator.py -i <path_to_bam> -T <path_to_ref> -o <output_path_prefix> [optional arguments]
+python tweakvarsimulator.py -i <path_to_bam> -T <path_to_ref> -o <output_path_prefix> [optional arguments]
 ```
 
 ##### Required Parameters  
@@ -180,9 +180,9 @@ python tykevarsimulator.py -i <path_to_bam> -T <path_to_ref> -o <output_path_pre
 | `-insdel, --insdel_sv_rate` | **Probability of generating an insertion vs. a deletion** in SVs. A value of **0.7** means insertions are more likely than deletions. | `0.7` |
 
 
-#### 2) TykeVarEditor - Generate Edited Reads Based on Simulated VCF
+#### 2) TweakVarEditor - Generate Edited Reads Based on Simulated VCF
 
-<img src="images/TykeVarEditor.png"  height="200" align="right">
+<img src="images/TweakVarEditor.png"  height="200" align="right">
 
 This command above takes in the VCF which determines which variants to introduce into the reads.
 The BAM file is used to find the reads which overlap with variant locations. Only a subset of the reads
@@ -191,12 +191,12 @@ The output BAM file retains the alignment info and now contains the edited reads
 
 ##### Usage
 ```bash
-python tykevareditor.py -v <simulated_vcf> -b <path_to_bam> -T <path_to_ref> -o <output_bam>
+python tweakvareditor.py -v <simulated_vcf> -b <path_to_bam> -T <path_to_ref> -o <output_bam>
 ```
 ##### Required Parameters  
 | Parameter               | Description |
 |-------------------------|-------------|
-| `-v, --vcf_file`         | VCF file from TykeVarSimulator  (SNV or SV). |
+| `-v, --vcf_file`         | VCF file from TweakVarSimulator  (SNV or SV). |
 | `-b, --bam_file`         | Input BAM file. |
 | `-T, --ref_file`         | Reference genome file for BAM. |
 | `-o, --out_file`         | Output BAM file name and directory. |
@@ -206,13 +206,13 @@ python tykevareditor.py -v <simulated_vcf> -b <path_to_bam> -T <path_to_ref> -o 
 |-----------|-------------|---------------|
 | `-of, --output_format` | **Output format** can be either sorted `bam` file or unmapped `fastq` file. Fastq format has to converted into a mapped bam file with an aligner, while mapped reads in the bam file will directly replace existing reads at their original position. | `"bam"` |
 
-#### 3) TykeVarMerger - Re-Align Modified Reads and Merge Them
+#### 3) TweakVarMerger - Re-Align Modified Reads and Merge Them
 
 Replace the reads in the original dataset with the modified reads. This step is time intensive so make sure to run it in a cluster environment for lage files.
 
 ##### Usage
 ```bash
-python tykevarmerger.py -b <input bam> -m <bam file with modified reads> --primary -o <out_dir>
+python tweakvarmerger.py -b <input bam> -m <bam file with modified reads> --primary -o <out_dir>
 ```
 
 ##### Required Parameters  
@@ -221,17 +221,17 @@ python tykevarmerger.py -b <input bam> -m <bam file with modified reads> --prima
 |-----------------|-----------------------------------------------|
 | `-b`, `--input_bam`  | Unmodified input BAM file                 |
 | `-m`, `--modified_bam` | BAM file with modified reads only        |
-| `-o`, `--out_file`  | Output file name (default: `tykevar_modified.bam` in the current directory) |
+| `-o`, `--out_file`  | Output file name (default: `tweakvar_modified.bam` in the current directory) |
 
 
-<img src="images/TykeVarMerger.png"  height="200" align="right">
+<img src="images/TweakVarMerger.png"  height="200" align="right">
 
 #### 4) Run Your Favorite Mosaic Variant Caller and Compare Results
 For SV calling, we tried Sniffles:
 ```
 sniffles --input <MOD_MERGED_BAM> --vcf sniffles_out.vcf --mosaic --threads 8
 ```
-* MOD_MERGED_BAM is the output bam file from `tykevarmerger.py`
+* MOD_MERGED_BAM is the output bam file from `tweakvarmerger.py`
 
 for SNV calling, we ran longshot:
 ```
@@ -284,9 +284,9 @@ Your spiked in reads are now visible in the IGV genome browser.
 <b>Example of a spiked in inserton.</b>
 </p>  
 
-### TykeVar
+### TweakVar
 
-Here, we use the TykeVar workflow to modify reads of HG002 directly at their reference position by including artificial mutations. To demonstrate the wide application of this tool, we generate a random distribution of allele frequencies between 1% and 40%. In contrast to the above approach, we do not introduce new haplotypes with this. However, more complex mutations (e.g. rearrangements, duplication, or very long structural variants) will not be able to be introduced to the data itself, since the size of the reads is limited.
+Here, we use the TweakVar workflow to modify reads of HG002 directly at their reference position by including artificial mutations. To demonstrate the wide application of this tool, we generate a random distribution of allele frequencies between 1% and 40%. In contrast to the above approach, we do not introduce new haplotypes with this. However, more complex mutations (e.g. rearrangements, duplication, or very long structural variants) will not be able to be introduced to the data itself, since the size of the reads is limited.
 
 
 #### 0) Fetch Data
@@ -306,13 +306,13 @@ Then, we decompress the FASTA file.
 gunzip hs37d5.fa.gz -c hs37d5.fa
 ```
 
-#### 1) TykeVarSimulator - Generate Variants and Modified Reads
+#### 1) TweakVarSimulator - Generate Variants and Modified Reads
 
 Then we simulate variants
 ```
 ## Example Usage
 ```bash
-python tykevarsimulator.py -i chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam -T hs37d5.fa -o output_dir/chr22 -s 42
+python tweakvarsimulator.py -i chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam -T hs37d5.fa -o output_dir/chr22 -s 42
 ```
 
 This command:  
@@ -320,14 +320,14 @@ This command:
 - Outputs simulated VCFs to `output_dir/chr22`.  
 - Sets a **random seed of 42** for reproducibility.  
 
-#### 3) TykeVarEditor - Add Modified Reads Back In
+#### 3) TweakVarEditor - Add Modified Reads Back In
 
 Generate a set of modified reads with inserted variants.
 ```
 python main.py -v chr22SV.vcf -b chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam -r hs37d5.fa -o chr22.fastq 
 ```
 
-#### 4) TykeVarMerger - Re-Align Modified Reads and Merge Them
+#### 4) TweakVarMerger - Re-Align Modified Reads and Merge Them
 Once the new reads are generated, they need to be re-aligned and re-inserted back into the dataset by replacing the original reads.
 
 We use `minimap2` for both short-read and long-read alignment. In the example, we tested on chromosome 22.
@@ -356,14 +356,14 @@ The `mod_chr22.bam` file was run through Sniffles to determine potential mosaic 
 Sniffles were both visualized on IGV to get a subjective view of whether the modified reads led to mosaic variants being introduced and detected.
 Below are 2 of several variants that overlapped between the ground truth and caller VCF and were confirmed in the underlying data.
 
-<img src="images/TykeVarMosaicInsert.png" align="center"/>
+<img src="images/TweakVarMosaicInsert.png" align="center"/>
 <p align="center"><b>A mosaic SV insertion.</b></p>
 <br />
 
-<img src="images/TykeVarMosaicDel.png" align="center"/>
+<img src="images/TweakVarMosaicDel.png" align="center"/>
 <p align="center"><b>A mosaic SV deletion.</b></p>
 
-<img src="images/TykeVarMosaicSNP.png" align="center"/>
+<img src="images/TweakVarMosaicSNP.png" align="center"/>
 <p align="center"><b>A mosaic SNP.</b></p>
 
 ## Method Description 
@@ -381,19 +381,19 @@ The SpikeVarReporter then determines VAFs for each variant in the mixed dataset 
  
 To assess a mosaic variant caller’s sensitivity and accuracy, the same mixed dataset is used to call mosaic variants. The output mosaic variant locations and VAFs are then compared to the truth set for validation.  
 
-### 2. TykeVar - Creation of Sequencing Data With a Subset of Modified Reads
-<img src="images/TykeVar_flowchart_updated.png" width="500"/>
+### 2. TweakVar - Creation of Sequencing Data With a Subset of Modified Reads
+<img src="images/TweakVar_flowchart_updated.png" width="500"/>
 <p align="justify">
-<b>TykeVar workflow, with major steps to assess the sensitivity and accuracy of the mosaic variant callers. (A, B: individual samples, A/B: merged samples, .bam and .vcf: input and output file formats in different steps, Black header boxes: tool or file names, Green header boxes: simulated files or final files used for validation comparisons)</b>
+<b>TweakVar workflow, with major steps to assess the sensitivity and accuracy of the mosaic variant callers. (A, B: individual samples, A/B: merged samples, .bam and .vcf: input and output file formats in different steps, Black header boxes: tool or file names, Green header boxes: simulated files or final files used for validation comparisons)</b>
 </p>  
 <br />
 
-The TykeVar workflow produces a modified aligned sequence file in .bam format. This file contains modified reads simulating randomly positioned mosaic variants with user-defined VAF in random locations and is accompanied by a .vcf file containing the locations of the simulated mosaic variants with user-defined VAF. 
+The TweakVar workflow produces a modified aligned sequence file in .bam format. This file contains modified reads simulating randomly positioned mosaic variants with user-defined VAF in random locations and is accompanied by a .vcf file containing the locations of the simulated mosaic variants with user-defined VAF. 
 
-The TykeVar workflow can be broadly split into 3 parts: 
-1) The TykeVarSimulator takes an aligned BAM, a reference, and several parameters such as range of VAF, variant sizes, etc. to generate a set of simulated mosaic SV and SNVs. It does so by choosing a random location and VAF from the given range and then evaluating whether that location has sufficient coverage for the desired VAF. If that condition is met, that variant is added to the output VCF. 
-2) The TykeVarEditor is responsible for inserting the simulated variants into the query sequences from the original dataset to generate modified reads with the mosaic variants built-in. The TykeVarEditor accepts a BAM, reference and the simulated VCF file as an input. Then for each variant, it fetches the overlapping reads from the BAM file, subsamples the reads to get the coverage that satisfies the desired VAF, and traverses the cigar string, query and reference sequences for each alignment to find the exact location to insert the variant. Once a modified read is created, it is written out into a FASTQ file. Note that for all new bases (SNVs or inserts), a q-score of 60 is chosen. The parsing and traversing of VCF, BAM and reference files are performed using APIs from pysam, biopython.SeqIO and numpy.
-3) The TykeVarMerger re-introduces the modified reads into the original dataset. It does so by first removing the modified read ids from the input BAM to create a filtered BAM. Then the modified reads are aligned against the reference, and merged with the filtered BAM. The end result is a BAM with the same set of read ids as the original dataset, except with some reads modified to contain the mosaic variants. 
+The TweakVar workflow can be broadly split into 3 parts: 
+1) The TweakVarSimulator takes an aligned BAM, a reference, and several parameters such as range of VAF, variant sizes, etc. to generate a set of simulated mosaic SV and SNVs. It does so by choosing a random location and VAF from the given range and then evaluating whether that location has sufficient coverage for the desired VAF. If that condition is met, that variant is added to the output VCF. 
+2) The TweakVarEditor is responsible for inserting the simulated variants into the query sequences from the original dataset to generate modified reads with the mosaic variants built-in. The TweakVarEditor accepts a BAM, reference and the simulated VCF file as an input. Then for each variant, it fetches the overlapping reads from the BAM file, subsamples the reads to get the coverage that satisfies the desired VAF, and traverses the cigar string, query and reference sequences for each alignment to find the exact location to insert the variant. Once a modified read is created, it is written out into a FASTQ file. Note that for all new bases (SNVs or inserts), a q-score of 60 is chosen. The parsing and traversing of VCF, BAM and reference files are performed using APIs from pysam, biopython.SeqIO and numpy.
+3) The TweakVarMerger re-introduces the modified reads into the original dataset. It does so by first removing the modified read ids from the input BAM to create a filtered BAM. Then the modified reads are aligned against the reference, and merged with the filtered BAM. The end result is a BAM with the same set of read ids as the original dataset, except with some reads modified to contain the mosaic variants. 
 The output of this pipeline is thus a modified BAM and a VCF file which provides the truth set for the mosaic variants.
 
 ## Contributers
