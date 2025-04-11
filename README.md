@@ -35,7 +35,7 @@ Installing two conda environments with python 3.10
 ```
 conda create -n MosaicSim python=3.10
 conda init
-conda activate mosaicSim
+conda activate MosaicSim
 ```
 
 Unload python if previously loaded so that python 3.10 from conda environment will be used
@@ -324,6 +324,10 @@ Then we simulate variants
 ```
 ## Example Usage
 ```bash
+module load anaconda3
+module load python
+conda activate MosaicSim
+module unload python
 python tweakvarsimulator.py -i chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam -T hs37d5.fa -o output_dir/chr22 -s 42
 ```
 
