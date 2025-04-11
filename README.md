@@ -292,19 +292,31 @@ Here, we use the TweakVar workflow to modify reads of HG002 directly at their re
 #### 0) Fetch Data
 In order to simulate and edit reads, the pipeline first needs an initial set of aligned reads and a reference. For our demonstration, we will use the GIAB datasets.
 
-Reads - `ftp://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/Ultralong_OxfordNanopore/guppy-V3.2.4_2020-01-22/HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam` and `ftp://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/Ultralong_OxfordNanopore/guppy-V3.2.4_2020-01-22/HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam.bai`
-
-Reference - `https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/references/GRCh37/hs37d5.fa.gz`
-
-We run the demonstration on chr22 only, so the dataset is filtered using
+Reads (bam file)
 ```
-samtools view HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam 22 > chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam
+mkdir $HOME/data ##or your data folder
+wget -P $HOME/data ftp://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/Ultralong_OxfordNanopore/guppy-V3.2.4_2020-01-22/HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam
+wget -P $HOME/data ftp://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/Ultralong_OxfordNanopore/guppy-V3.2.4_2020-01-22/HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam.bai`
 ```
+
+Reference
+```
+mkdir $HOME/data/ref 
+wget -P $HOME/data/ref https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/references/GRCh37/hs37d5.fa.gz
+```
+
 
 Then, we decompress the FASTA file.
 ```
-gunzip hs37d5.fa.gz -c hs37d5.fa
+gunzip $HOME/data/ref/hs37d5.fa.gz
+samtools faidx $HOME/data/ref/hs37d5.fa
 ```
+
+We run the demonstration on chr22 only, so the dataset is filtered using
+```
+samtools view $HOME/data/HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam 22 > $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam
+```
+
 
 #### 1) TweakVarSimulator - Generate Variants and Modified Reads
 
