@@ -27,7 +27,8 @@ module load miniconda/3
 ```
 or
 ```
-module load anaconda3
+module load anaconda3 ##sometimes python has to be loaded before starting an environment)
+module load python
 ```
 
 Installing two conda environments with python 3.10
