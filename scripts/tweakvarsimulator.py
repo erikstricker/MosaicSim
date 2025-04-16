@@ -123,9 +123,14 @@ SNVvcf=f"{output_prefix}_SNV.vcf" # name of output vcf file for SNV
 CHROMS = [str(i) for i in range(1,23)] + ["X","Y"]
 CHROMS += [f'chr{c}' for c in CHROMS]
 
-def get_chrom_lengths(bam_path, ref_chroms=CHROMS):
+def get_chrom_lengths(bam_path, ref_chroms=None):
     with pysam.AlignmentFile(bam_path) as bam:
-        chromol = dict((c,l) for c,l in zip(bam.references, bam.lengths) if c in ref_chroms)
+        chromol = dict(zip(bam.references, bam.lengths))
+
+    if ref_chroms is not None:
+        # Filter only if ref_chroms is specified
+        chromol = {c: l for c, l in chromol.items() if c in ref_chroms}
+
     return chromol, tuple(chromol.keys())
 
 def genlocSNV(num,bam_path,mincov=20):
