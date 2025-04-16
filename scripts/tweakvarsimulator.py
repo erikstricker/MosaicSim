@@ -138,6 +138,7 @@ def genlocSNV(num,bam_path,mincov=20):
     chromol, chrom = get_chrom_lengths(bam_path)
     locations=[]
     for i in range(num):
+        print(f"Creating SNV {i}/{num}")
         while True:
             ranchrom=nran.choice(chrom)
             loc=str(nran.randint(0,chromol[ranchrom]))
@@ -155,6 +156,7 @@ def genlocSV(num,bam_path,mincov=20):
     chromol, chrom = get_chrom_lengths(bam_path)
     locations=[]
     for i in range(num):
+        print(f"Creating SV {i}/{num}")
         while True:
             ranchrom=nran.choice(chrom)
             loc=str(nran.randint(0,chromol[ranchrom]))
@@ -247,6 +249,8 @@ def main():
     chromol, chrom = get_chrom_lengths(bam_path)
 
     random.seed(seed)
+
+    print("writing the output file(s)")
 
     if numsv > 0:
         #print(snvloc)
