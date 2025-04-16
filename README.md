@@ -25,10 +25,9 @@ Load conda, e.g.
 ```
 module load miniconda/3
 ```
-or (in some instances python has to be loaded to run the conda command)
+or
 ```
-module load anaconda3/2024.02
-module load python
+module load anaconda3
 ```
 
 Installing two conda environments with python 3.10
@@ -314,7 +313,9 @@ samtools faidx $HOME/data/ref/hs37d5.fa
 
 We run the demonstration on chr22 only, so the dataset is filtered using
 ```
-samtools view $HOME/data/HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam 22 > $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam
+samtools view -b $HOME/data/HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam 22 \
+  | samtools sort -o $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam
+samtools index $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam
 ```
 
 
@@ -325,10 +326,8 @@ Then we simulate variants
 ## Example Usage
 ```bash
 module load anaconda3
-module load python
 conda activate MosaicSim
-module unload python
-python tweakvarsimulator.py -i chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam -T hs37d5.fa -o output_dir/chr22 -s 42
+python scripts/tweakvarsimulator.py -i $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam -T $HOME/data/ref/hs37d5.fa -o $HOME/test_output_dir/chr22/chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05 -s 0
 ```
 
 This command:  
