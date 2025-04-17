@@ -55,7 +55,7 @@ def vcf_number_variants_bam_out(input_vcf_file, input_bam_file, refs, outfile):
     """Return the number of each variant separately and write output in BAM format."""
     bamfile = pysam.AlignmentFile(input_bam_file, 'rb')
     vcffile = pysam.VariantFile(input_vcf_file, 'r')  # SV or SNV VCF
-    bam_out = pysam.AlignmentFile(outfile, 'wb', header=bamfile.header)  # Output BAM file
+    bam_out = pysam.AlignmentFile(outfile.replace(".bam", "_pre.bam"), 'wb', header=bamfile.header)  # Output BAM file
 
     for v in vcffile:
         var_type = v.info.get('SVTYPE') if 'SVTYPE' in v.info else 'SNV'
@@ -126,12 +126,11 @@ def vcf_number_variants_bam_out(input_vcf_file, input_bam_file, refs, outfile):
     bam_out.close()  # Close output BAM file
 
     # **Sort and Index the BAM file**
-    sorted_bam = outfile.replace(".bam", "_sorted.bam")
-    pysam.sort("-o", sorted_bam, outfile)
-    pysam.index(sorted_bam)
+    pysam.sort("-o", outfile, outfile.replace(".bam", "_pre.bam"))
+    pysam.index(outfile)
 
-    print(f"Sorted BAM file saved as: {sorted_bam}")
-    print(f"Index file created: {sorted_bam}.bai")
+    print(f"Sorted BAM file saved as: {outfile}")
+    print(f"Index file created: {outfile}.bai")
 
     return
 
