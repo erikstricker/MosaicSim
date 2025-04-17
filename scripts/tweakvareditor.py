@@ -128,6 +128,8 @@ def vcf_number_variants_bam_out(input_vcf_file, input_bam_file, refs, outfile):
     # **Sort and Index the BAM file**
     pysam.sort("-o", outfile, outfile.replace(".bam", "_pre.bam"))
     pysam.index(outfile)
+	
+    os.remove(outfile.replace(".bam", "_pre.bam"))
 
     print(f"Sorted BAM file saved as: {outfile}")
     print(f"Index file created: {outfile}.bai")
