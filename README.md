@@ -212,7 +212,7 @@ Replace the reads in the original dataset with the modified reads. This step is 
 
 ##### Usage
 ```bash
-python tweakvarmerger.py -b <input bam> -m <bam file with modified reads> --primary -o <out_dir>
+python tweakvarmerger.py -b <input bam> -m <bam file with modified reads> --primary -o <out_dir and file name>
 ```
 
 ##### Required Parameters  
@@ -326,24 +326,34 @@ Then we simulate variants
 ```
 ## Example Usage
 ```bash
-module load anaconda3
+module load anaconda3/2024.02
+module load python
 conda activate MosaicSim
-python scripts/tweakvarsimulator.py -i $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam -T $HOME/data/ref/hs37d5.fa -o $HOME/test_output_dir/chr22/chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05 -s 0
+module unload python
+cd $HOME/MosaicSim
+python scripts/tweakvarsimulator.py -i $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam -T $HOME/data/ref/hs37d5.fa -o $HOME/test_output_dir/chr22/chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05 -s 0 -numsv 5 -numsnv 100
 ```
 
 This command:  
 - Uses `chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam` as input and `hs37d5.fa` as the reference genome.  
-- Outputs simulated VCFs to `output_dir/chr22`.  
-- Sets a **random seed of 42** for reproducibility.  
+- Outputs simulated VCFs to `test_output_dir/chr22`.  
+- Sets a **random seed of 0** for reproducibility.  
 
 #### 3) TweakVarEditor - Add Modified Reads Back In
 
 Generate a set of modified reads with inserted variants.
 ```
-python main.py -v chr22SV.vcf -b chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam -r hs37d5.fa -o chr22.fastq 
+module load anaconda3/2024.02
+module load python
+conda activate MosaicSim
+module unload python
+cd $HOME/MosaicSim
+python  scripts/tweakvareditor.py -v $HOME/test_output_dir/chr22/chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05_SNV.vcf -b $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam -T $HOME/data/ref/hs37d5.fa -o $HOME/test_output_dir/chr22/chr22_SNV_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05.bam -of "bam"
 ```
 
 #### 4) TweakVarMerger - Re-Align Modified Reads and Merge Them
+##TODO REWRITE
+
 Once the new reads are generated, they need to be re-aligned and re-inserted back into the dataset by replacing the original reads.
 
 We use `minimap2` for both short-read and long-read alignment. In the example, we tested on chromosome 22.
