@@ -212,7 +212,7 @@ Replace the reads in the original dataset with the modified reads. This step is 
 
 ##### Usage
 ```bash
-python tweakvarmerger.py -b <input bam> -m <bam file with modified reads> --primary -o <out_dir and file name>
+python tweakvarmerger.py -b <input bam> -m <bam file with modified reads> -o <out_dir and file name>
 ```
 
 ##### Required Parameters  
