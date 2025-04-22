@@ -331,7 +331,10 @@ module load python
 conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
-python scripts/tweakvarsimulator.py -i $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam -T $HOME/data/ref/hs37d5.fa -o $HOME/test_output_dir/chr22/chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05 -s 0 -numsv 5 -numsnv 100
+python scripts/tweakvarsimulator.py -i $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam  \
+-T $HOME/data/ref/hs37d5.fa  \
+-o $HOME/test_output_dir/chr22/chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05  \
+-s 0 -numsv 5 -numsnv 100
 ```
 
 This command:  
@@ -348,37 +351,111 @@ module load python
 conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
-python  scripts/tweakvareditor.py -v $HOME/test_output_dir/chr22/chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05_SNV.vcf -b $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam -T $HOME/data/ref/hs37d5.fa -o $HOME/test_output_dir/chr22/chr22_SNV_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05.bam -of "bam"
+python  scripts/tweakvareditor.py \
+ -v $HOME/test_output_dir/chr22/chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05_SNV.vcf \
+ -b $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam \
+ -T $HOME/data/ref/hs37d5.fa \
+ -o $HOME/test_output_dir/chr22/chr22_SNV_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05.bam \
+ -of "bam"
+```
+
+The modified reads can also be generated as an unmapped FASTQ file to simulate potential napping error that could arise:
+```
+module load anaconda3/2024.02
+module load python
+conda activate MosaicSim
+module unload python
+cd $HOME/MosaicSim
+python  scripts/tweakvareditor.py \
+ -v $HOME/test_output_dir/chr22/chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05_SNV.vcf \
+ -b $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam \
+ -T $HOME/data/ref/hs37d5.fa \
+ -o $HOME/test_output_dir/chr22/chr22_SNV_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05.fastq \
+ -of "fastq"
 ```
 
 #### 4) TweakVarMerger - Re-Align Modified Reads and Merge Them
-##TODO REWRITE
 
-Once the new reads are generated, they need to be re-aligned and re-inserted back into the dataset by replacing the original reads.
-
-We use `minimap2` for both short-read and long-read alignment. In the example, we tested on chromosome 22.
+Once the new reads are generated in BAM format, we then remove the old alignments with the same IDs of modified reads in the original BAM file, then insert the new alignments of modified reads back into this BAM file.
 ```
-# short read
-minimap2 -ax sr hs37d5.fa.gz -t 14 --secondary=no chr22.fastq | \
-    samtools view -bS --no-PG - > modified.chr22.bam
+module load anaconda3/2024.02
+module load python
+conda activate MosaicSim
+module unload python
+cd $HOME/MosaicSim
+python  scripts/tweakvarmerger.py \
+ -b $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam \
+ -m $HOME/test_output_dir/chr22/chr22_SNV_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05.bam \
+ -o $HOME/test_output_dir/chr22/merged.modified_chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam
+```
 
-# long read
-minimap2 -ax map-ont hs37d5.fa.gz -t 14 --secondary=no chr22.fastq | \
-    samtools view -bS --no-PG - > modified.chr22.bam
+If the reads were generated in FASTQ format, they need to be re-aligned using a tool like minimap2 and then re-inserted back into the dataset by replacing the original reads.
+
+We can use `minimap2` for both short-read and long-read alignment. In the example, we tested on chromosome 22.
+```
+input_fastq="$HOME/test_output_dir/chr22/chr22_SNV_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05.fastq"
+output_bam="$HOME/test_output_dir/chr22/chr22_SNV_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05.fastq.bam"
+reference="$HOME/data/ref/hs37d5.fa"
+```
+Choose the alignment setting that best fits your needs: 
+***short read - standard***
+```
+minimap2 -ax sr ${reference}  -t 14 --secondary=no $input_fastq | samtools view -bS --no-PG - | \
+samtools sort -o ${output_bam}
+samtools index -b ${output_bam}
+```
+***long read - standard***
+```
+minimap2 -ax map-ont ${reference}  -t 14 --secondary=no $input_fastq | samtools view -bS --no-PG - | \
+samtools sort -o ${output_bam}
+samtools index -b ${output_bam}
+```
+***short read - error permissable***
+```
+minimap2 -ax sr \
+    -A 2 -B 3 -O 5,56 -E 4,1 --score-N 0 -e 0 \
+    --max-chain-skip 25 \
+    ${reference} \
+    -t 14 --secondary=no \
+    $input_fastq | \
+samtools view -bS --no-PG - | \
+samtools sort -o ${output_bam}
+samtools index -b ${output_bam}
+```
+***long read - error permissable***
+```
+minimap2 -ax map-ont \
+    -k 19 -w 5 \
+    -A 2 -B 4 -O 2,20 -E 2,1 \
+    --score-N 0 --max-chain-skip 50 --max-chain-gap 10000 \
+    -e 0 \
+    $HOME/data/ref/hs37d5.fa \
+    -t 14 $input_fastq | \
+samtools view -bS --no-PG - | \
+samtools sort -o ${output_bam}
+samtools index -b ${output_bam}
 ```
 
 Now that we have the alignments for modified reads, we then remove the old alignments with the same IDs of modified reads in the original bam, then insert the new alignments of modified reads back into this bam.
 ```
-python filter_merge_bam.py -b chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam -m modified.chr22.bam
+module load anaconda3/2024.02
+module load python
+conda activate MosaicSim
+module unload python
+cd $HOME/MosaicSim
+python  scripts/tweakvarmerger.py \
+ -b $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam \
+ -m $HOME/test_output_dir/chr22/chr22_SNV_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05.fastq.bam \
+ -o $HOME/test_output_dir/chr22/merged.modified_chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam
 ```
 
 #### 5) Run Your Favorite Mosaic Variant Caller
 
-Run you choice of mosaic variant caller on the modified `mod_chr22.bam` file and compare the results with the simulated `chr22SV.vcf` file.
+Run you choice of mosaic variant caller on the modified `merged.modified_chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam` file and compare the results with the simulated `chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05_SNV.vcf` file.
 
 #### 6) Results
 
-The `mod_chr22.bam` file was run through Sniffles to determine potential mosaic variants. Then the ground truth VCF (chr22SV.vcf) and the VCF from
+The `merged.modified_chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam` file was run through Sniffles to determine potential mosaic variants. Then the ground truth VCF (chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05_SNV.vcf) and the VCF from
 Sniffles were both visualized on IGV to get a subjective view of whether the modified reads led to mosaic variants being introduced and detected.
 Below are 2 of several variants that overlapped between the ground truth and caller VCF and were confirmed in the underlying data.
 
