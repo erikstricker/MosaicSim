@@ -331,10 +331,11 @@ module load python
 conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
-python scripts/tweakvarsimulator.py -i $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam  \
--T $HOME/data/ref/hs37d5.fa  \
--o $HOME/test_output_dir/chr22/chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05  \
--s 0 -numsv 5 -numsnv 100
+python scripts/tweakvarsimulator.py \
+ -i $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam  \
+ -T $HOME/data/ref/hs37d5.fa  \
+ -o $HOME/test_output_dir/chr22/chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05  \
+ -s 0 -numsv 5 -numsnv 100
 ```
 
 This command:  
