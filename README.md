@@ -295,28 +295,28 @@ In order to simulate and edit reads, the pipeline first needs an initial set of 
 Reads (bam file)
 ```
 mkdir $HOME/data ##or your data folder
-wget -P $HOME/data ftp://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/Ultralong_OxfordNanopore/guppy-V3.2.4_2020-01-22/HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam
-wget -P $HOME/data ftp://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/Ultralong_OxfordNanopore/guppy-V3.2.4_2020-01-22/HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam.bai`
+wget -P $HOME/data https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/NIST_Illumina_2x250bps/novoalign_bams/HG002.GRCh38.2x250.bam
+wget -P $HOME/data https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/NIST_Illumina_2x250bps/novoalign_bams/HG002.GRCh38.2x250.bam.bai
 ```
 
 Reference
 ```
 mkdir $HOME/data/ref 
-wget -P $HOME/data/ref https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/references/GRCh37/hs37d5.fa.gz
+wget -P $HOME/data/refhttps://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/references/GRCh38/GRCh38_masked_v2_decoy_gene.fasta.gz 
 ```
 
 
 Then, we decompress the FASTA file.
 ```
-gunzip $HOME/data/ref/hs37d5.fa.gz
-samtools faidx $HOME/data/ref/hs37d5.fa
+gunzip $HOME/data/ref/GRCh38_masked_v2_decoy_gene.fasta.gz 
+samtools faidx $HOME/data/ref/GRCh38_masked_v2_decoy_gene.fasta
 ```
 
 We run the demonstration on chr22 only, so the dataset is filtered using
 ```
-samtools view -b $HOME/data/HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam 22 \
-  | samtools sort -o $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam
-samtools index $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam
+samtools view -b $HOME/data/HG002.GRCh38.2x250.bam chr22 \
+  | samtools sort -o $HOME/data/chr22.HG002.GRCh38.2x250.bam
+samtools index $HOME/data/chr22.HG002.GRCh38.2x250.bam
 ```
 
 
@@ -332,14 +332,14 @@ conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
 python scripts/tweakvarsimulator.py \
- -i $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam  \
- -T $HOME/data/ref/hs37d5.fa  \
- -o $HOME/test_output_dir/chr22/chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05  \
+ -i $HOME/data/chr22.HG002.GRCh38.2x250.bam \
+ -T $HOME/data/ref/GRCh38_masked_v2_decoy_gene.fasta \
+ -o $HOME/test_output_dir/chr22/chr22.HG002.GRCh38.2x250_MAF0.01-0.05 \
  -s 0 -numsv 5 -numsnv 100
 ```
 
 This command:  
-- Uses `chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam` as input and `hs37d5.fa` as the reference genome.  
+- Uses `chr22.HG002.GRCh38.2x250.bam` as input and `GRCh38_masked_v2_decoy_gene.fasta` as the reference genome.  
 - Outputs simulated VCFs to `test_output_dir/chr22`.  
 - Sets a **random seed of 0** for reproducibility.  
 
@@ -353,14 +353,14 @@ conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
 python  scripts/tweakvareditor.py \
- -v $HOME/test_output_dir/chr22/chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05_SNV.vcf \
- -b $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam \
- -T $HOME/data/ref/hs37d5.fa \
- -o $HOME/test_output_dir/chr22/chr22_SNV_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05.bam \
+ -v $HOME/test_output_dir/chr22/chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.vcf \
+ -b $HOME/data/chr22.HG002.GRCh38.2x250.bam \
+ -T $HOME/data/ref/GRCh38_masked_v2_decoy_gene.fasta  \
+ -o $HOME/test_output_dir/chr22/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.bam \
  -of "bam"
 ```
 
-The modified reads can also be generated as an unmapped FASTQ file to simulate potential napping error that could arise:
+The modified reads can also be generated as an unmapped FASTQ file to simulate potential mapping error that could arise:
 ```
 module load anaconda3/2024.02
 module load python
@@ -368,10 +368,10 @@ conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
 python  scripts/tweakvareditor.py \
- -v $HOME/test_output_dir/chr22/chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05_SNV.vcf \
- -b $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam \
- -T $HOME/data/ref/hs37d5.fa \
- -o $HOME/test_output_dir/chr22/chr22_SNV_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05.fastq \
+ -v $HOME/test_output_dir/chr22/chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.vcf \
+ -b $HOME/data/chr22.HG002.GRCh38.2x250.bam \
+ -T $HOME/data/ref/GRCh38_masked_v2_decoy_gene.fasta  \
+ -o $HOME/test_output_dir/chr22/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq \
  -of "fastq"
 ```
 
@@ -385,18 +385,18 @@ conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
 python  scripts/tweakvarmerger.py \
- -b $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam \
- -m $HOME/test_output_dir/chr22/chr22_SNV_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05.bam \
- -o $HOME/test_output_dir/chr22/merged.modified_chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam
+ -b $HOME/data/chr22.HG002.GRCh38.2x250.bam \
+ -m $HOME/test_output_dir/chr22/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.bam \
+ -o $HOME/test_output_dir/chr22/merged.modified_chr22.HG002.GRCh38.2x250.bam
 ```
 
 If the reads were generated in FASTQ format, they need to be re-aligned using a tool like minimap2 and then re-inserted back into the dataset by replacing the original reads.
 
 We can use `minimap2` for both short-read and long-read alignment. In the example, we tested on chromosome 22.
 ```
-input_fastq="$HOME/test_output_dir/chr22/chr22_SNV_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05.fastq"
-output_bam="$HOME/test_output_dir/chr22/chr22_SNV_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05.fastq.bam"
-reference="$HOME/data/ref/hs37d5.fa"
+input_fastq="$HOME/test_output_dir/chr22/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq"
+output_bam="$HOME/test_output_dir/chr22/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq.bam"
+reference="$HOME/data/ref/GRCh38_masked_v2_decoy_gene.fasta"
 ```
 Choose the alignment setting that best fits your needs: 
 ***short read - standard***
@@ -445,9 +445,9 @@ conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
 python  scripts/tweakvarmerger.py \
- -b $HOME/data/chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam \
- -m $HOME/test_output_dir/chr22/chr22_SNV_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05.fastq.bam \
- -o $HOME/test_output_dir/chr22/merged.modified_chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam
+ -b $HOME/data/chr22.HG002.GRCh38.2x250.bam \
+ -m $HOME/test_output_dir/chr22/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq.bam \
+ -o $HOME/test_output_dir/chr22/merged.modified_chr22.HG002.GRCh38.2x250.bam
 ```
 
 #### 5) Run Your Favorite Mosaic Variant Caller
@@ -456,19 +456,16 @@ Run you choice of mosaic variant caller on the modified `merged.modified_chr22.H
 
 #### 6) Results
 
-The `merged.modified_chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam` file was run through Sniffles to determine potential mosaic variants. Then the ground truth VCF (chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05_SNV.vcf) and the VCF from
-Sniffles were both visualized on IGV to get a subjective view of whether the modified reads led to mosaic variants being introduced and detected.
+The `chr22.HG002.GRCh38.2x250.bam` and `merged.modified_chr22.HG002.GRCh38.2x250.bam` were both visualized on IGV to get a subjective view of whether the modified reads led to mosaic variants being introduced and detected.
 Below are 2 of several variants that overlapped between the ground truth and caller VCF and were confirmed in the underlying data.
 
-<img src="images/TweakVarMosaicInsert.png" align="center"/>
-<p align="center"><b>A mosaic SV insertion.</b></p>
+<img src="images/TweakVarMosaicSNV1.png" align="center"/>
+<p align="center"><b>A mosaic SNV at position chr22:10961073</b></p>
 <br />
 
-<img src="images/TweakVarMosaicDel.png" align="center"/>
-<p align="center"><b>A mosaic SV deletion.</b></p>
+<img src="images/TweakVarMosaicSNV2.png" align="center"/>
+<p align="center"><b>A mosaic SNV at position chr22:30088854</b></p>
 
-<img src="images/TweakVarMosaicSNP.png" align="center"/>
-<p align="center"><b>A mosaic SNP.</b></p>
 
 ## Method Description 
 
