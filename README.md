@@ -178,7 +178,7 @@ python tweakvarsimulator.py -i <path_to_bam> -T <path_to_ref> -o <output_path_pr
 | `-sub, --substitution_rate` | **Probability of generating a SNP** versus an indel (in SNVs). A value of **1.0** means only SNPs will be generated. | `1.0` |
 | `-insdelsnv, --insdel_snv_rate` | **Probability of generating an insertion vs. a deletion** in SNVs. A value of **0.5** means equal chances of insertion and deletion. | `0.5` |
 | `-insdel, --insdel_sv_rate` | **Probability of generating an insertion vs. a deletion** in SVs. A value of **0.7** means insertions are more likely than deletions. | `0.7` |
-
+| `--ref_chroms` | List of **chromosomes to include** in the simulation (e.g., `chr1 chr2 ... chrY`). Only these chromosomes will be used for variant generation. | *All chromosomes in the BAM header* |
 
 #### 2) TweakVarEditor - Generate Edited Reads Based on Simulated VCF
 
