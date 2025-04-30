@@ -166,7 +166,7 @@ python tweakvarsimulator.py -i <path_to_bam> -T <path_to_ref> -o <output_path_pr
 ##### Optional Parameters  
 | Parameter | Description | Default Value |
 |-----------|-------------|---------------|
-| `-s, --seed` | **Random seed** for reproducibility. If not set, the results will vary between runs. | `0` |
+| `-s, --seed` | **Random seed** for reproducibility. If not set, the results will vary between runs. The same seed with different input but identical parameters will lead to the same list of loci. | `0` |
 | `-minAFsv, --minimum_allele_frequency_sv` | **Minimum allele frequency** for simulated **structural variants (SVs)**. | `0.01` |
 | `-maxAFsv, --maximum_allele_frequency_sv` | **Maximum allele frequency** for **SVs**. | `0.05` |
 | `-minAFsnv, --minimum_allele_frequency_snv` | **Minimum allele frequency** for **single nucleotide variants (SNVs)**. | `0.01` |
