@@ -33,6 +33,7 @@ parser.add_argument("-maxsvl", "--maximum_sv_length", type=int, required=False, 
 parser.add_argument("-sub", "--substitution_rate", type=float, required=False, help="Probability of producing a SNP vs indel in SNV")
 parser.add_argument("-insdelsnv", "--insdel_snv_rate", type=float, required=False, help="Probability of producing an insertion vs deletion in SNV")
 parser.add_argument("-insdel", "--insdel_sv_rate", type=float, required=False, help="Probability of producing an insertion vs deletion in SV")
+parser.add_argument("--ref_chroms", nargs='+', help="Optional list of reference chromosomes to restrict analysis to")
 
 # Parse arguments
 args = parser.parse_args()
@@ -120,9 +121,6 @@ else:
 SVvcf=f"{output_prefix}_SV.vcf" # name of output vcf file for SV
 SNVvcf=f"{output_prefix}_SNV.vcf" # name of output vcf file for SNV
 
-CHROMS = [str(i) for i in range(1,23)] + ["X","Y"]
-CHROMS += [f'chr{c}' for c in CHROMS]
-
 def get_chrom_lengths(bam_path, ref_chroms=None):
     with pysam.AlignmentFile(bam_path) as bam:
         chromol = dict(zip(bam.references, bam.lengths))
@@ -135,7 +133,8 @@ def get_chrom_lengths(bam_path, ref_chroms=None):
 
 def genlocSNV(num,bam_path,mincov=20):
     npseed(seed)
-    chromol, chrom = get_chrom_lengths(bam_path)
+    ref_chroms = args.ref_chroms
+    chromol, chrom = get_chrom_lengths(bam_path, ref_chroms=ref_chroms)
     locations=[]
     for i in range(num):
         print(f"Creating SNV {i+1}/{num}")
@@ -153,7 +152,8 @@ def genlocSNV(num,bam_path,mincov=20):
 
 def genlocSV(num,bam_path,mincov=20):
     npseed(seed)
-    chromol, chrom = get_chrom_lengths(bam_path)
+    ref_chroms = args.ref_chroms
+    chromol, chrom = get_chrom_lengths(bam_path, ref_chroms=ref_chroms)
     locations=[]
     for i in range(num):
         print(f"Creating SV {i+1}/{num}")
