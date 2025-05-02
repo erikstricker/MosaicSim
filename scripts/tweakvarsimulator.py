@@ -234,13 +234,7 @@ def main():
             print(f"Retrieving SNV {i+1}/{len(raw_snvloc)} from truth vcf")
             chrom, pos, ref, alt, af_val = raw_snvloc[i]
             pos = str(pos)
-            while True:
-                try:
-                    cover = int(depth(bam_path, '-r', chrom + ":" + pos + "-" + pos).rstrip("\n").split("\t")[-1])
-                except ValueError:
-                    continue
-                if cover >= ceil(1 / af_val):
-                    break
+            cover = int(depth(bam_path, '-r', chrom + ":" + pos + "-" + pos).rstrip("\n").split("\t")[-1])
             pos = int(pos)
             readnum = ceil(af_val * cover)
             vcfsnv.append(f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t1500\tPASS\tAF={af_val:.2f}\tGT:AD:DV\t0/0:{cover-readnum}:{readnum}")
