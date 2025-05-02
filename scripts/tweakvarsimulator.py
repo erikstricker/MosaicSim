@@ -243,7 +243,7 @@ def main():
                     break
             pos = int(pos)
             readnum = ceil(af_val * cover)
-            vcfsnv.append(f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t1500\tPASS\tAF={af:.2f}\tGT:AD:DV\t0/0:{cover-readnum}:{readnum}")
+            vcfsnv.append(f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t1500\tPASS\tAF={af_val:.2f}\tGT:AD:DV\t0/0:{cover-readnum}:{readnum}")
 
         vcfsnv.append('\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE']))
         with open(SNVvcf, "w") as f:
