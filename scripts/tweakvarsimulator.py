@@ -100,7 +100,7 @@ def genlocSNV(num,bam_path,mincov=20):
     chromol, chrom = get_chrom_lengths(bam_path, ref_chroms=ref_chroms)
     locations=[]
     for i in range(num):
-        print(f"Creating SNV {i+1}/{num}")
+        print(f"Creating SNV {i+1}/{num}...")
         while True:
             ranchrom=nran.choice(chrom)
             loc=str(nran.randint(0,chromol[ranchrom]))
@@ -119,7 +119,7 @@ def genlocSV(num,bam_path,mincov=20):
     chromol, chrom = get_chrom_lengths(bam_path, ref_chroms=ref_chroms)
     locations=[]
     for i in range(num):
-        print(f"Creating SV {i+1}/{num}")
+        print(f"Creating SV {i+1}/{num}...")
         while True:
             ranchrom=nran.choice(chrom)
             loc=str(nran.randint(0,chromol[ranchrom]))
@@ -232,7 +232,7 @@ def main():
         vcfsnv.append('\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE']))
         snvloc = []
         for i in range(len(raw_snvloc)):
-            print(f"Retrieving SNV {i+1}/{len(raw_snvloc)} from truth vcf")
+            print(f"Retrieving SNV {i+1}/{len(raw_snvloc)} from truth vcf...")
             chrom, pos, ref, alt, af_val = raw_snvloc[i]
             pos = str(pos)
             cover = int(depth(bam_path, '-r', chrom + ":" + pos + "-" + pos).rstrip("\n").split("\t")[-1])
@@ -244,12 +244,12 @@ def main():
             f.write('\n'.join(vcfsnv))
         f.close()
 
-        print(f"New SNV truth vcf written to {SNVvcf}")
+        print(f"New SNV truth vcf written to {SNVvcf}.")
     else:
         snvloc=genlocSNV(numsnv,bam_path,ceil(1/minAFsnv))
         random.seed(seed)
 
-        print("writing the SNV output file")
+        print("Writing the SNV output file...")
 
         if numsnv > 0:
             vcfsnv=[
@@ -280,13 +280,13 @@ def main():
                 f.write(tuple(vcfsnv)[-1])
             f.close()
 
-            print(f"New SNV truth vcf written to {SNVvcf}")
+            print(f"New SNV truth vcf written to {SNVvcf}.")
             
 
     # SV processing
     if sv_truth_file is not None:
 
-        print(f"Retrieving SVs from truth vcf")
+        print(f"Retrieving SVs from truth vcf...")
         svloc = parse_truth_vcf(sv_truth_file)
         vcfsv = [
             '##fileformat=VCFv4.2',
@@ -320,7 +320,7 @@ def main():
         with open(SVvcf, "w") as f:
             f.write('\n'.join(vcfsv))
 
-        print(f"New SV truth vcf written to {SVvcf}")
+        print(f"New SV truth vcf written to {SVvcf}.")
         
 
     else:
@@ -328,7 +328,7 @@ def main():
         chromol, chrom = get_chrom_lengths(bam_path)
         random.seed(seed)
 
-        print("writing the SV output file")
+        print("Writing the SV output file...")
         if numsv > 0:
             #print(snvloc)
             vcfsv=[
@@ -374,7 +374,7 @@ def main():
                 f.write(tuple(vcfsv)[-1])
             f.close()
             
-            print(f"New SV truth vcf written to {SVvcf}")
+            print(f"New SV truth vcf written to {SVvcf}.")
         
 
 if __name__ == "__main__":
