@@ -6,120 +6,83 @@ import os
 import numpy as np
 from numpy.random import choice, uniform, seed as npseed
 from numpy import random as nran
-from math import ceil, log
+from math import ceil
 import random
 
 # Initialize parser
 parser = argparse.ArgumentParser(description="TweakVarSimulator: A tool for simulating variants")
 
-# Define required arguments
+# Required arguments
 parser.add_argument("-i", "--input", required=True, help="Path to input BAM file")
 parser.add_argument("-T", "--reference", required=True, help="Path to reference genome")
 parser.add_argument("-o", "--output", required=True, help="Output file prefix")
 
 # Optional arguments
 parser.add_argument("-s", "--seed", type=int, required=False, help="Seed for random number generation")
-parser.add_argument("-minAFsv", "--minimum_allele_frequency_sv", type=float, required=False, help="Minimum allele frequency for structural variants")
-parser.add_argument("-maxAFsv", "--maximum_allele_frequency_sv", type=float, required=False, help="Maximum allele frequency for structural variants")
-parser.add_argument("-minAFsnv", "--minimum_allele_frequency_snv", type=float, required=False, help="Minimum allele frequency for single nucleotide variants")
-parser.add_argument("-maxAFsnv", "--maximum_allele_frequency_snv", type=float, required=False, help="Maximum allele frequency for single nucleotide variants")
+parser.add_argument("-minAFsv", "--minimum_allele_frequency_sv", type=float, required=False)
+parser.add_argument("-maxAFsv", "--maximum_allele_frequency_sv", type=float, required=False)
+parser.add_argument("-minAFsnv", "--minimum_allele_frequency_snv", type=float, required=False)
+parser.add_argument("-maxAFsnv", "--maximum_allele_frequency_snv", type=float, required=False)
+parser.add_argument("-numsv", "--number_of_svs", type=int, required=False)
+parser.add_argument("-numsnv", "--number_of_snvs", type=int, required=False)
+parser.add_argument("-maxsnvl", "--maximum_snv_length", type=int, required=False)
+parser.add_argument("-minsvl", "--minimum_sv_length", type=int, required=False)
+parser.add_argument("-maxsvl", "--maximum_sv_length", type=int, required=False)
+parser.add_argument("-sub", "--substitution_rate", type=float, required=False)
+parser.add_argument("-insdelsnv", "--insdel_snv_rate", type=float, required=False)
+parser.add_argument("-insdel", "--insdel_sv_rate", type=float, required=False)
+parser.add_argument("--ref_chroms", nargs='+', help="Optional list of reference chromosomes")
+parser.add_argument("-snv", "--SNV_truth_file", required=False, help="Optional SNV truth VCF file")
+parser.add_argument("-sv", "--SV_truth_file", required=False, help="Optional SV truth VCF file")
 
-# Newly added arguments
-parser.add_argument("-numsv", "--number_of_svs", type=int, required=False, help="Number of structural variants to simulate")
-parser.add_argument("-numsnv", "--number_of_snvs", type=int, required=False, help="Number of single nucleotide variants to simulate")
-parser.add_argument("-maxsnvl", "--maximum_snv_length", type=int, required=False, help="Maximum length of single nucleotide variants indels")
-parser.add_argument("-minsvl", "--minimum_sv_length", type=int, required=False, help="Minimum length of structural variants")
-parser.add_argument("-maxsvl", "--maximum_sv_length", type=int, required=False, help="Maximum length of structural variants")
-parser.add_argument("-sub", "--substitution_rate", type=float, required=False, help="Probability of producing a SNP vs indel in SNV")
-parser.add_argument("-insdelsnv", "--insdel_snv_rate", type=float, required=False, help="Probability of producing an insertion vs deletion in SNV")
-parser.add_argument("-insdel", "--insdel_sv_rate", type=float, required=False, help="Probability of producing an insertion vs deletion in SV")
-parser.add_argument("--ref_chroms", nargs='+', help="Optional list of reference chromosomes to restrict analysis to")
-
-# Parse arguments
 args = parser.parse_args()
 
-# Check for missing arguments
-if len(sys.argv) < 2:
-    print("Usage: python vcfgen.py -i <path_to_bam> -T <path_to_ref> -o <output_path_prefix> [optional arguments]")
-    print("\nExample: python vcfgen.py -i chr22.bam -T hs37d5.fa -o chr22")
-    print("The above generates a chr22_SV.vcf and chr22_SNV.vcf file")
-    exit(0)
-
-
-# Access variables
 bam_path = args.input
 ref_path = args.reference
 output_prefix = args.output
+snv_truth_file = args.SNV_truth_file
+sv_truth_file = args.SV_truth_file
 
-## Test variables
-if args.seed is None:
-    seed=0
-else:
-    seed=args.seed
+seed = args.seed if args.seed is not None else 0
+npseed(seed)
+random.seed(seed)
 
-if args.minimum_allele_frequency_sv is None:
-    minAFsv=0.01 # minimum allele frequency SV 
-else:
-    minAFsv=args.minimum_allele_frequency_sv  
+if not sv_truth_file:
+    minAFsv = args.minimum_allele_frequency_sv if args.minimum_allele_frequency_sv is not None else 0.01
+    maxAFsv = args.maximum_allele_frequency_sv if args.maximum_allele_frequency_sv is not None else 0.05
+    numsv = args.number_of_svs if args.number_of_svs is not None else 50
+    minsvl = args.minimum_sv_length if args.minimum_sv_length is not None else 50
+    maxsvl = args.maximum_sv_length if args.maximum_sv_length is not None else 10000
+    insdel = args.insdel_sv_rate if args.insdel_sv_rate is not None else 0.7
 
-if args.maximum_allele_frequency_sv is None:
-    maxAFsv=0.05  # maximum allele frequency SV
-else:
-    maxAFsv=args.maximum_allele_frequency_sv 
+if not snv_truth_file:
+    minAFsnv = args.minimum_allele_frequency_snv if args.minimum_allele_frequency_snv is not None else 0.01
+    maxAFsnv = args.maximum_allele_frequency_snv if args.maximum_allele_frequency_snv is not None else 0.05
+    numsnv = args.number_of_snvs if args.number_of_snvs is not None else 200
+    maxsnvl = args.maximum_snv_length if args.maximum_snv_length is not None else 100
+    sub = args.substitution_rate if args.substitution_rate is not None else 1
+    insdelsnv = args.insdel_snv_rate if args.insdel_snv_rate is not None else 0.5
 
-if args.minimum_allele_frequency_snv is None:
-    minAFsnv=0.01 # minimum allele frequency SNV 
-else:
-    minAFsnv=args.minimum_allele_frequency_snv  
+SVvcf = f"{output_prefix}_SV.vcf"
+SNVvcf = f"{output_prefix}_SNV.vcf"
 
-if args.maximum_allele_frequency_snv is None:
-    maxAFsnv=0.05  # maximum allele frequency SNV
-else:
-    maxAFsnv=args.maximum_allele_frequency_snv 
-
-if args.number_of_svs is None:
-    numsv=50  # number of SVs to simulate
-else:
-    numsv=args.number_of_svs 
-
-if args.number_of_snvs is None:
-    numsnv=200  # number of SNVs to simulate
-else:
-    numsnv=args.number_of_snvs  
-
-if args.maximum_snv_length is None:
-    maxsnvl=100  # maximum SNV length
-else:
-    maxsnvl=args.maximum_snv_length 
-
-if args.minimum_sv_length is None:
-    minsvl=50  # minimum SV length
-else:
-    minsvl=args.minimum_sv_length 
-
-if args.maximum_sv_length is None:
-    maxsvl=10000  # maximum SV length
-else:
-    maxsvl=args.maximum_sv_length 
-
-if args.substitution_rate is None:
-    sub=1  # probability of producing a SNP vs indel in SNV
-else:
-    sub=args.substitution_rate 
-
-if args.insdel_snv_rate is None:
-    insdelsnv=0.5  # probability of producing INS vs DEL in SNV
-else:
-    insdelsnv=args.insdel_snv_rate 
-
-if args.insdel_sv_rate is None:
-    insdel=0.7  # probability of producing INS vs DEL in SV
-else:
-    insdel=args.insdel_sv_rate 
-
-
-SVvcf=f"{output_prefix}_SV.vcf" # name of output vcf file for SV
-SNVvcf=f"{output_prefix}_SNV.vcf" # name of output vcf file for SNV
+def parse_truth_vcf(vcf_path):
+    records = []
+    with open(vcf_path, 'r') as f:
+        for line in f:
+            if line.startswith('#'):
+                continue
+            parts = line.strip().split('\t')
+            chrom, pos, _, ref, alt, _, _, info, *_ = parts
+            af_val = 0.05
+            for field in info.split(';'):
+                if field.startswith('AF='):
+                    try:
+                        af_val = float(field.split('=')[1])
+                    except:
+                        pass
+            records.append((chrom, pos, ref, alt, af_val))
+    return records
 
 def get_chrom_lengths(bam_path, ref_chroms=None):
     with pysam.AlignmentFile(bam_path) as bam:
@@ -241,20 +204,90 @@ def getrefsnp(reffile,snplist=1):
     
 
 
-def main():
+def genseq(minl,maxl):
+    npseed(seed)
+    nucl=tuple(["A","T","C","G"])
+    res=''
+    for i in range(choice(range(minl,maxl+1))):
+        res+=choice(nucl)
+    return res
 
-    svloc=genlocSV(numsv,bam_path,ceil(1/minAFsv))
-    snvloc=genlocSNV(numsnv,bam_path,ceil(1/minAFsnv))
-    
+def main():
     chromol, chrom = get_chrom_lengths(bam_path)
 
-    random.seed(seed)
+    # SNV processing
+    if snv_truth_file:
+        raw_snvloc = parse_truth_vcf(snv_truth_file)
 
-    print("writing the output file(s)")
+        vcfsnv = [
+            '##fileformat=VCFv4.2',
+            '##FILTER=<ID=PASS,Description="All filters passed">',
+            '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+            '##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Read depth for each allele">',
+            '##FORMAT=<ID=DV,Number=1,Type=Integer,Description="Number of variant reads">',
+            '##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">'
+        ]
+        vcfsnv.extend([f'##contig=<ID={c},length={l}>' for c, l in chromol.items()])
 
-    if numsv > 0:
-        #print(snvloc)
-        vcfsv=[
+        snvloc = []
+        for i in range(len(raw_snvloc)):
+            print(f"Retrieving SNV {i+1}/{num} from truth vcf")
+            chrom, pos, ref, alt, af_val = raw_snvloc[i]
+            pos = str(pos)
+            while True:
+                try:
+                    cover = int(depth(bam_path, '-r', chrom + ":" + pos + "-" + pos).rstrip("\n").split("\t")[-1])
+                except ValueError:
+                    continue
+                if cover >= ceil(1 / af_val):
+                    break
+            pos = int(pos)
+            readnum = ceil(af * cover)
+            vcfsnv.append(f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t1500\tPASS\tAF={af:.2f}\tGT:AD:DV\t0/0:{cover-readnum}:{readnum}")
+
+        vcfsnv.append('\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE']))
+        with open(SNVvcf, "w") as f:
+            f.write('\n'.join(vcfsnv))
+    else:
+        snvloc=genlocSNV(numsnv,bam_path,ceil(1/minAFsnv))
+        random.seed(seed)
+
+        print("writing the SNV output file")
+
+        if numsnv > 0:
+            vcfsnv=[
+                '##fileformat=VCFv4.2',
+                '##FILTER=<ID=PASS,Description="All filters passed">',
+                '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+                '##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Read depth for each allele">',
+                '##FORMAT=<ID=DV,Number=1,Type=Integer,Description="Number of variant reads">',
+                '##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">'
+            ]
+
+            # Dynamically add contig lines
+            vcfsnv.extend([f'##contig=<ID={c},length={l}>' for c, l in chromol.items()])
+
+            # Add VCF column headers
+            vcfsnv.append('\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE']))
+
+            snps=getrefsnp(ref_path,snvloc)
+            
+            
+            for i in gensnps(maxsnvl=maxsnvl,sub=sub, snplist=snps):
+                AFnum=(round(random.uniform(minAFsnv,maxAFsnv),2))
+                readnum=ceil(AFnum*i[2])
+                vcfsnv.append(str(i[0])+'\t'+str(i[1])+'\t.\t'+str(i[3])+'\t'+str(i[4])+"\t1500\tPASS\tAF="+str(AFnum)+"\tGT:AD:DV\t0/0:"+str(i[2]-readnum)+":"+str(readnum))
+            with open(SNVvcf,"w") as f:
+                for i in tuple(vcfsnv)[:-1]:
+                    f.write(i+'\n')
+                f.write(tuple(vcfsnv)[-1])
+            f.close()
+            
+
+    # SV processing
+    if sv_truth_file:
+        svloc = parse_truth_vcf(sv_truth_file)
+        vcfsv = [
             '##fileformat=VCFv4.2',
             '##ALT=<ID=INS,Description="Insertion">',
             '##ALT=<ID=DEL,Description="Deletion">',
@@ -267,65 +300,76 @@ def main():
             '##INFO=<ID=END,Number=1,Type=Integer,Description="End position of structural variation">',
             '##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">'
         ]
-
-        # Dynamically add contig lines
         vcfsv.extend([f'##contig=<ID={c},length={l}>' for c, l in chromol.items()])
-
-        # Add VCF column headers
         vcfsv.append('\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE']))
 
-        insertnum=1
-        delnum=1
-        for i in svloc:
-            draw = choice(tuple(['in','del']), 1, p=[insdel,1-insdel])    
-            if draw=='in':
-                seq=genseq(minsvl,maxsvl)
-                vcfsv.append(str(i[0])+"\t"+str(i[1])+"\tHackIns"+str(insertnum)+"\tN\t"+seq+"\t60\tPASS\tPRECISE;SVTYPE=INS;SVLEN="+str(len(seq))+";END="+str(int(i[1])+1)+";AF="+str(round(random.uniform(minAFsv,maxAFsv),2))+"\tGT:GQ\t0/0:60")
-                #PRECISE;SVTYPE=INS;SVLEN=333;END=748218 AF \t GT:GQ:DR:DV \t	0/0:28:28:5
-                insertnum+=1
+        for idx, record in enumerate(svloc):
+            if sv_truth_file:
+                chrom, pos, ref, alt, af = record
             else:
-                dellen=choice(range(minsvl,maxsvl))
-                vcfsv.append(str(i[0])+"\t"+str(i[1])+"\tHackDel"+str(delnum)+"\tN\t<DEL>\t60\tPASS\tPRECISE;SVTYPE=DEL;SVLEN=-"+str(dellen)+";END="+str(int(i[1])+dellen)+";AF="+str(round(random.uniform(minAFsv,maxAFsv),2))+"\tGT:GQ\t0/0:60")
-                delnum+=1
+                chrom, pos = record
+                ref, alt = 'N', genseq(minsvl, maxsvl) if choice([True, False], p=[insdel, 1-insdel]) else '<DEL>'
+                af = round(random.uniform(minAFsv, maxAFsv), 2)
+            svtype = 'INS' if len(alt) > len(ref) else 'DEL'
+            svlen = len(alt) - len(ref) if svtype == 'INS' else -(len(ref) - len(alt))
+            end = pos + abs(svlen)
+            ID = f"SV{idx+1}"
+            vcfsv.append(f"{chrom}\t{pos}\t{ID}\t{ref}\t{alt}\t60\tPASS\tPRECISE;SVTYPE={svtype};SVLEN={svlen};END={end};AF={af:.2f}\tGT:GQ\t0/0:60")
 
-        # Ensure parent directories exist
-        os.makedirs(os.path.dirname(output_prefix), exist_ok=True)
+        with open(SVvcf, "w") as f:
+            f.write('\n'.join(vcfsv))
 
-        with open(SVvcf,"w") as f:
-            for i in tuple(vcfsv)[:-1]:
-                f.write(i+'\n')
-            f.write(tuple(vcfsv)[-1])
-        f.close()
+    else:
+        svloc=genlocSV(numsv,bam_path,ceil(1/minAFsv))
+        chromol, chrom = get_chrom_lengths(bam_path)
+        random.seed(seed)
 
-    random.seed(seed)
+        print("writing the SV output file")
+        if numsv > 0:
+            #print(snvloc)
+            vcfsv=[
+                '##fileformat=VCFv4.2',
+                '##ALT=<ID=INS,Description="Insertion">',
+                '##ALT=<ID=DEL,Description="Deletion">',
+                '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+                '##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype quality">',
+                '##FILTER=<ID=PASS,Description="All filters passed">',
+                '##INFO=<ID=PRECISE,Number=0,Type=Flag,Description="Structural variation with precise breakpoints">',
+                '##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variation">',
+                '##INFO=<ID=SVLEN,Number=1,Type=Integer,Description="Length of structural variation">',
+                '##INFO=<ID=END,Number=1,Type=Integer,Description="End position of structural variation">',
+                '##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">'
+            ]
 
-    if numsnv > 0:
-        vcfsnv=[
-            '##fileformat=VCFv4.2',
-            '##FILTER=<ID=PASS,Description="All filters passed">',
-            '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
-            '##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Read depth for each allele">',
-            '##FORMAT=<ID=DV,Number=1,Type=Integer,Description="Number of variant reads">',
-            '##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">'
-        ]
+            # Dynamically add contig lines
+            vcfsv.extend([f'##contig=<ID={c},length={l}>' for c, l in chromol.items()])
 
-        # Dynamically add contig lines
-        vcfsnv.extend([f'##contig=<ID={c},length={l}>' for c, l in chromol.items()])
+            # Add VCF column headers
+            vcfsv.append('\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE']))
 
-        # Add VCF column headers
-        vcfsnv.append('\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE']))
+            insertnum=1
+            delnum=1
+            for i in svloc:
+                draw = choice(tuple(['in','del']), 1, p=[insdel,1-insdel])    
+                if draw=='in':
+                    seq=genseq(minsvl,maxsvl)
+                    vcfsv.append(str(i[0])+"\t"+str(i[1])+"\tHackIns"+str(insertnum)+"\tN\t"+seq+"\t60\tPASS\tPRECISE;SVTYPE=INS;SVLEN="+str(len(seq))+";END="+str(int(i[1])+1)+";AF="+str(round(random.uniform(minAFsv,maxAFsv),2))+"\tGT:GQ\t0/0:60")
+                    #PRECISE;SVTYPE=INS;SVLEN=333;END=748218 AF \t GT:GQ:DR:DV \t   0/0:28:28:5
+                    insertnum+=1
+                else:
+                    dellen=choice(range(minsvl,maxsvl))
+                    vcfsv.append(str(i[0])+"\t"+str(i[1])+"\tHackDel"+str(delnum)+"\tN\t<DEL>\t60\tPASS\tPRECISE;SVTYPE=DEL;SVLEN=-"+str(dellen)+";END="+str(int(i[1])+dellen)+";AF="+str(round(random.uniform(minAFsv,maxAFsv),2))+"\tGT:GQ\t0/0:60")
+                    delnum+=1
 
-        snps=getrefsnp(ref_path,snvloc)
+            # Ensure parent directories exist
+            os.makedirs(os.path.dirname(output_prefix), exist_ok=True)
+
+            with open(SVvcf,"w") as f:
+                for i in tuple(vcfsv)[:-1]:
+                    f.write(i+'\n')
+                f.write(tuple(vcfsv)[-1])
+            f.close()
         
-        
-        for i in gensnps(maxsnvl=maxsnvl,sub=sub, snplist=snps):
-            AFnum=(round(random.uniform(minAFsnv,maxAFsnv),2))
-            readnum=ceil(AFnum*i[2])
-            vcfsnv.append(str(i[0])+'\t'+str(i[1])+'\t.\t'+str(i[3])+'\t'+str(i[4])+"\t1500\tPASS\tAF="+str(AFnum)+"\tGT:AD:DV\t0/0:"+str(i[2]-readnum)+":"+str(readnum))
-        with open(SNVvcf,"w") as f:
-            for i in tuple(vcfsnv)[:-1]:
-                f.write(i+'\n')
-            f.write(tuple(vcfsnv)[-1])
-        f.close()
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()
