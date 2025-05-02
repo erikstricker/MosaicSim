@@ -229,6 +229,7 @@ def main():
         ]
         vcfsnv.extend([f'##contig=<ID={c},length={l}>' for c, l in chromol.items()])
 
+        vcfsnv.append('\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE']))
         snvloc = []
         for i in range(len(raw_snvloc)):
             print(f"Retrieving SNV {i+1}/{len(raw_snvloc)} from truth vcf")
@@ -239,9 +240,11 @@ def main():
             readnum = ceil(af_val * cover)
             vcfsnv.append(f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t1500\tPASS\tAF={af_val:.2f}\tGT:AD:DV\t0/0:{cover-readnum}:{readnum}")
 
-        vcfsnv.append('\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE']))
         with open(SNVvcf, "w") as f:
             f.write('\n'.join(vcfsnv))
+        f.close()
+
+        print(f"New SNV truth vcf written to {SNVvcf}")
     else:
         snvloc=genlocSNV(numsnv,bam_path,ceil(1/minAFsnv))
         random.seed(seed)
@@ -276,10 +279,14 @@ def main():
                     f.write(i+'\n')
                 f.write(tuple(vcfsnv)[-1])
             f.close()
+
+            print(f"New SNV truth vcf written to {SNVvcf}")
             
 
     # SV processing
     if sv_truth_file is not None:
+
+        print(f"Retrieving SVs from truth vcf")
         svloc = parse_truth_vcf(sv_truth_file)
         vcfsv = [
             '##fileformat=VCFv4.2',
@@ -312,6 +319,9 @@ def main():
 
         with open(SVvcf, "w") as f:
             f.write('\n'.join(vcfsv))
+
+        print(f"New SV truth vcf written to {SVvcf}")
+        
 
     else:
         svloc=genlocSV(numsv,bam_path,ceil(1/minAFsv))
@@ -363,6 +373,8 @@ def main():
                     f.write(i+'\n')
                 f.write(tuple(vcfsv)[-1])
             f.close()
+            
+            print(f"New SV truth vcf written to {SVvcf}")
         
 
 if __name__ == "__main__":
