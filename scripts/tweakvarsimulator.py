@@ -231,7 +231,7 @@ def main():
 
         snvloc = []
         for i in range(len(raw_snvloc)):
-            print(f"Retrieving SNV {i+1}/{numsnv} from truth vcf")
+            print(f"Retrieving SNV {i+1}/{len(raw_snvloc)} from truth vcf")
             chrom, pos, ref, alt, af_val = raw_snvloc[i]
             pos = str(pos)
             while True:
