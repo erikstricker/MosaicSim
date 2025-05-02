@@ -242,7 +242,7 @@ def main():
                 if cover >= ceil(1 / af_val):
                     break
             pos = int(pos)
-            readnum = ceil(af * cover)
+            readnum = ceil(af_val * cover)
             vcfsnv.append(f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t1500\tPASS\tAF={af:.2f}\tGT:AD:DV\t0/0:{cover-readnum}:{readnum}")
 
         vcfsnv.append('\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE']))
