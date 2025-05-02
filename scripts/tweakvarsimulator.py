@@ -143,7 +143,7 @@ def genseq(minl,maxl):
         res+=choice(nucl)
     return res
 
-def gensnps(maxsnvl=maxsnvl,sub=sub,insdelsnv=insdelsnv, snplist=[]):
+def gensnps(maxsnvl,sub,insdelsnv, snplist=[]):
     npseed(seed)
     result=[]
     nucl=["A","T","C","G"]
