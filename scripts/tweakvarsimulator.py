@@ -47,7 +47,7 @@ seed = args.seed if args.seed is not None else 0
 npseed(seed)
 random.seed(seed)
 
-if not sv_truth_file is None:
+if sv_truth_file is None:
     minAFsv = args.minimum_allele_frequency_sv if args.minimum_allele_frequency_sv is not None else 0.01
     maxAFsv = args.maximum_allele_frequency_sv if args.maximum_allele_frequency_sv is not None else 0.05
     numsv = args.number_of_svs if args.number_of_svs is not None else 50
