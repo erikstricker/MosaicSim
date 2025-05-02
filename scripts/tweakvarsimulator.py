@@ -47,7 +47,7 @@ seed = args.seed if args.seed is not None else 0
 npseed(seed)
 random.seed(seed)
 
-if not sv_truth_file:
+if not sv_truth_file is None:
     minAFsv = args.minimum_allele_frequency_sv if args.minimum_allele_frequency_sv is not None else 0.01
     maxAFsv = args.maximum_allele_frequency_sv if args.maximum_allele_frequency_sv is not None else 0.05
     numsv = args.number_of_svs if args.number_of_svs is not None else 50
@@ -55,7 +55,7 @@ if not sv_truth_file:
     maxsvl = args.maximum_sv_length if args.maximum_sv_length is not None else 10000
     insdel = args.insdel_sv_rate if args.insdel_sv_rate is not None else 0.7
 
-if not snv_truth_file:
+if snv_truth_file is None:
     minAFsnv = args.minimum_allele_frequency_snv if args.minimum_allele_frequency_snv is not None else 0.01
     maxAFsnv = args.maximum_allele_frequency_snv if args.maximum_allele_frequency_snv is not None else 0.05
     numsnv = args.number_of_snvs if args.number_of_snvs is not None else 200
@@ -216,7 +216,7 @@ def main():
     chromol, chrom = get_chrom_lengths(bam_path)
 
     # SNV processing
-    if snv_truth_file:
+    if snv_truth_file is not None:
         raw_snvloc = parse_truth_vcf(snv_truth_file)
 
         vcfsnv = [
@@ -285,7 +285,7 @@ def main():
             
 
     # SV processing
-    if sv_truth_file:
+    if sv_truth_file is not None:
         svloc = parse_truth_vcf(sv_truth_file)
         vcfsv = [
             '##fileformat=VCFv4.2',
