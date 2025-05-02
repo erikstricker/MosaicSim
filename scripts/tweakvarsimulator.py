@@ -306,7 +306,7 @@ def main():
                 af = round(random.uniform(minAFsv, maxAFsv), 2)
             svtype = 'INS' if len(alt) > len(ref) else 'DEL'
             svlen = len(alt) - len(ref) if svtype == 'INS' else -(len(ref) - len(alt))
-            end = pos + abs(svlen)
+            end = int(pos) + abs(svlen)
             ID = f"SV{idx+1}"
             vcfsv.append(f"{chrom}\t{pos}\t{ID}\t{ref}\t{alt}\t60\tPASS\tPRECISE;SVTYPE={svtype};SVLEN={svlen};END={end};AF={af:.2f}\tGT:GQ\t0/0:60")
 
