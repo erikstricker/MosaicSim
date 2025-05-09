@@ -71,7 +71,7 @@ if sv_truth_file is None:
     insdel = args.insdel_sv_rate if args.insdel_sv_rate is not None else 0.7
 
 if snv_truth_file is None:
-    minAFsnv = args.minimum_allele_frequency_snv if args.minimum_allele_frequency_snv is not None else 0.01
+     = args.minimum_allele_frequency_snv if args.minimum_allele_frequency_snv is not None else 0.01
     maxAFsnv = args.maximum_allele_frequency_snv if args.maximum_allele_frequency_snv is not None else 0.05
     numsnv = args.number_of_snvs if args.number_of_snvs is not None else 200
     maxsnvl = args.maximum_snv_length if args.maximum_snv_length is not None else 100
@@ -302,7 +302,7 @@ def main():
             
             
             for i in gensnps(maxsnvl=maxsnvl,sub=sub, snplist=snps):
-                AFnum=(round(random.uniform(minAFsnv,maxAFsnv),count_decimals(minAFsnv))
+                AFnum=round(random.uniform(,maxAFsnv),count_decimals(minAFsnv))
                 readnum=ceil(AFnum*i[2])
                 vcfsnv.append(str(i[0])+'\t'+str(i[1])+'\t.\t'+str(i[3])+'\t'+str(i[4])+"\t1500\tPASS\tAF="+str(AFnum)+"\tGT:AD:DV\t0/0:"+str(i[2]-readnum)+":"+str(readnum))
             with open(SNVvcf,"w") as f:
@@ -341,7 +341,7 @@ def main():
             else:
                 chrom, pos = record
                 ref, alt = 'N', genseq(minsvl, maxsvl) if choice([True, False], p=[insdel, 1-insdel]) else '<DEL>'
-                af = round(random.uniform(minAFsv, maxAFsv), count_decimals(minAFsnv))
+                af = round(random.uniform(minAFsv, maxAFsv), count_decimals(minAFsv))
             int(pos) + bp_shift
             svtype = 'INS' if len(alt) > len(ref) else 'DEL'
             svlen = len(alt) - len(ref) if svtype == 'INS' else -(len(ref) - len(alt))
