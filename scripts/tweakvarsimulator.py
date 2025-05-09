@@ -37,7 +37,7 @@ parser.add_argument("-sv", "--SV_truth_file", required=False, help="Optional SV 
 
 ##Secret arguments
 parser.add_argument("-bps", "--bp_shift", type=int,  required=False, help="Optionally allows you to shift all bp positions up or downstream by the indicated number of bps")
-parser.add_argument("-imc", "--ignore_minimum_cov", type=boolean, required=False, help="If True, loci will not be evaluated for minimum coverage")
+parser.add_argument("-imc", "--ignore_minimum_cov", type=bool, required=False, help="If True, loci will not be evaluated for minimum coverage")
 
 args = parser.parse_args()
 
