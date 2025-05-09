@@ -81,6 +81,13 @@ if snv_truth_file is None:
 SVvcf = f"{output_prefix}_SV.vcf"
 SNVvcf = f"{output_prefix}_SNV.vcf"
 
+def count_decimals(x):
+    s = str(x)
+    if '.' in s:
+        return len(s.split('.')[-1].rstrip('0'))
+    else:
+        return 0
+
 def parse_truth_vcf(vcf_path):
     records = []
     with open(vcf_path, 'r') as f:
@@ -295,7 +302,7 @@ def main():
             
             
             for i in gensnps(maxsnvl=maxsnvl,sub=sub, snplist=snps):
-                AFnum=(round(random.uniform(minAFsnv,maxAFsnv),2))
+                AFnum=(round(random.uniform(minAFsnv,maxAFsnv),count_decimals(minAFsnv))
                 readnum=ceil(AFnum*i[2])
                 vcfsnv.append(str(i[0])+'\t'+str(i[1])+'\t.\t'+str(i[3])+'\t'+str(i[4])+"\t1500\tPASS\tAF="+str(AFnum)+"\tGT:AD:DV\t0/0:"+str(i[2]-readnum)+":"+str(readnum))
             with open(SNVvcf,"w") as f:
@@ -334,7 +341,7 @@ def main():
             else:
                 chrom, pos = record
                 ref, alt = 'N', genseq(minsvl, maxsvl) if choice([True, False], p=[insdel, 1-insdel]) else '<DEL>'
-                af = round(random.uniform(minAFsv, maxAFsv), 2)
+                af = round(random.uniform(minAFsv, maxAFsv), count_decimals(minAFsnv))
             int(pos) + bp_shift
             svtype = 'INS' if len(alt) > len(ref) else 'DEL'
             svlen = len(alt) - len(ref) if svtype == 'INS' else -(len(ref) - len(alt))
