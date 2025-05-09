@@ -113,14 +113,14 @@ def genlocSNV(num,bam_path,mincov=20):
         print(f"Creating SNV {i+1}/{num}...")
         while True:
             ranchrom=nran.choice(chrom)
-            loc=str(nran.randint(0,chromol[ranchrom]))
+            loc=str(nran.randint(0,chromol[ranchrom])+bp_shift)
             try:
                 cover=int(depth(bam_path,'-r',ranchrom+":"+loc+"-"+loc).rstrip("\n").split("\t")[-1])
             except ValueError:
                 continue
             if cover>=mincov:
                 break
-        locations.append(tuple([ranchrom,loc+bp_shift,cover]))
+        locations.append(tuple([ranchrom,loc,cover]))
     return tuple(locations)
 
 def genlocSV(num,bam_path,mincov=20):
@@ -132,7 +132,7 @@ def genlocSV(num,bam_path,mincov=20):
         print(f"Creating SV {i+1}/{num}...")
         while True:
             ranchrom=nran.choice(chrom)
-            loc=str(nran.randint(0,chromol[ranchrom]))
+            loc=str(nran.randint(0,chromol[ranchrom])+bp_shift)
             for i in locations:
                 if i[0]==ranchrom and abs(int(i[1]))-int(loc)<50000:
                     continue
@@ -142,7 +142,7 @@ def genlocSV(num,bam_path,mincov=20):
                 continue
             if cover>=mincov:
                 break
-        locations.append(tuple([ranchrom,loc+bp_shift,cover]))
+        locations.append(tuple([ranchrom,loc,cover]))
     return tuple(locations)
 
 def genseq(minl,maxl):
