@@ -71,7 +71,7 @@ if sv_truth_file is None:
     insdel = args.insdel_sv_rate if args.insdel_sv_rate is not None else 0.7
 
 if snv_truth_file is None:
-     = args.minimum_allele_frequency_snv if args.minimum_allele_frequency_snv is not None else 0.01
+    minAFsnv = args.minimum_allele_frequency_snv if args.minimum_allele_frequency_snv is not None else 0.01
     maxAFsnv = args.maximum_allele_frequency_snv if args.maximum_allele_frequency_snv is not None else 0.05
     numsnv = args.number_of_snvs if args.number_of_snvs is not None else 200
     maxsnvl = args.maximum_snv_length if args.maximum_snv_length is not None else 100
