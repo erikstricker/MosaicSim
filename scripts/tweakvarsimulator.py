@@ -35,6 +35,9 @@ parser.add_argument("--ref_chroms", nargs='+', help="Optional list of reference 
 parser.add_argument("-snv", "--SNV_truth_file", required=False, help="Optional SNV truth VCF file")
 parser.add_argument("-sv", "--SV_truth_file", required=False, help="Optional SV truth VCF file")
 
+##Secret arguments
+parser.add_argument("-bps", "--bp_shift", required=False, help="Optionally allows you to shift all bp positions up or downstream by the indicated number of bps")
+
 args = parser.parse_args()
 
 bam_path = args.input
@@ -42,6 +45,13 @@ ref_path = args.reference
 output_prefix = args.output
 snv_truth_file = args.SNV_truth_file
 sv_truth_file = args.SV_truth_file
+
+bp_shift = args.bp_shift
+
+if bp_shift is None:
+    bp_shift = 0
+else:
+    bp_shift = int(bp_shift)
 
 seed = args.seed if args.seed is not None else 0
 npseed(seed)
@@ -110,7 +120,7 @@ def genlocSNV(num,bam_path,mincov=20):
                 continue
             if cover>=mincov:
                 break
-        locations.append(tuple([ranchrom,loc,cover]))
+        locations.append(tuple([ranchrom,loc+bp_shift,cover]))
     return tuple(locations)
 
 def genlocSV(num,bam_path,mincov=20):
@@ -132,7 +142,7 @@ def genlocSV(num,bam_path,mincov=20):
                 continue
             if cover>=mincov:
                 break
-        locations.append(tuple([ranchrom,loc,cover]))
+        locations.append(tuple([ranchrom,loc+bp_shift,cover]))
     return tuple(locations)
 
 def genseq(minl,maxl):
@@ -234,7 +244,8 @@ def main():
         for i in range(len(raw_snvloc)):
             print(f"Retrieving SNV {i+1}/{len(raw_snvloc)} from truth vcf...")
             chrom, pos, ref, alt, af_val = raw_snvloc[i]
-            pos = str(pos)
+            ##update the position
+            pos = str(pos+bp_shift)
             cover = int(depth(bam_path, '-r', chrom + ":" + pos + "-" + pos).rstrip("\n").split("\t")[-1])
             pos = int(pos)
             readnum = ceil(af_val * cover)
@@ -311,6 +322,7 @@ def main():
                 chrom, pos = record
                 ref, alt = 'N', genseq(minsvl, maxsvl) if choice([True, False], p=[insdel, 1-insdel]) else '<DEL>'
                 af = round(random.uniform(minAFsv, maxAFsv), 2)
+            int(pos) + bp_shift
             svtype = 'INS' if len(alt) > len(ref) else 'DEL'
             svlen = len(alt) - len(ref) if svtype == 'INS' else -(len(ref) - len(alt))
             end = int(pos) + abs(svlen)
@@ -330,7 +342,6 @@ def main():
 
         print("Writing the SV output file...")
         if numsv > 0:
-            #print(snvloc)
             vcfsv=[
                 '##fileformat=VCFv4.2',
                 '##ALT=<ID=INS,Description="Insertion">',
