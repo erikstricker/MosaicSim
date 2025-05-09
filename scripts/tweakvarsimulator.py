@@ -36,7 +36,8 @@ parser.add_argument("-snv", "--SNV_truth_file", required=False, help="Optional S
 parser.add_argument("-sv", "--SV_truth_file", required=False, help="Optional SV truth VCF file")
 
 ##Secret arguments
-parser.add_argument("-bps", "--bp_shift", required=False, help="Optionally allows you to shift all bp positions up or downstream by the indicated number of bps")
+parser.add_argument("-bps", "--bp_shift", type=int,  required=False, help="Optionally allows you to shift all bp positions up or downstream by the indicated number of bps")
+parser.add_argument("-imc", "--ignore_minimum_cov", type=boolean, required=False, help="If True, loci will not be evaluated for minimum coverage")
 
 args = parser.parse_args()
 
@@ -47,6 +48,10 @@ snv_truth_file = args.SNV_truth_file
 sv_truth_file = args.SV_truth_file
 
 bp_shift = args.bp_shift
+ignore_minimum_cov = args.ignore_minimum_cov
+
+if ignore_minimum_cov is None:
+    ignore_minimum_cov = False
 
 if bp_shift is None:
     bp_shift = 0
@@ -118,8 +123,12 @@ def genlocSNV(num,bam_path,mincov=20):
                 cover=int(depth(bam_path,'-r',ranchrom+":"+loc+"-"+loc).rstrip("\n").split("\t")[-1])
             except ValueError:
                 continue
-            if cover>=mincov:
+            ##Test for minimum coverage requirement
+            if ignore_minimum_cov:
                 break
+            else:
+                if cover>=mincov:
+                    break
         locations.append(tuple([ranchrom,loc,cover]))
     return tuple(locations)
 
@@ -140,8 +149,12 @@ def genlocSV(num,bam_path,mincov=20):
                 cover=int(depth(bam_path,'-r',ranchrom+":"+loc+"-"+loc).rstrip("\n").split("\t")[-1])
             except ValueError:
                 continue
-            if cover>=mincov:
+            ##Test for minimum coverage requirement
+            if ignore_minimum_cov:
                 break
+            else:
+                if cover>=mincov:
+                    break
         locations.append(tuple([ranchrom,loc,cover]))
     return tuple(locations)
 
@@ -257,7 +270,7 @@ def main():
 
         print(f"New SNV truth vcf written to {SNVvcf}.")
     else:
-        snvloc=genlocSNV(numsnv,bam_path,ceil(1/minAFsnv))
+        snvloc=genlocSNV(numsnv,bam_path,ceil(1/maxAFsnv))
         random.seed(seed)
 
         print("Writing the SNV output file...")
