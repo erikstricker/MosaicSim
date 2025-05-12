@@ -267,7 +267,7 @@ def main():
             cover = int(depth(bam_path, '-r', chrom + ":" + pos + "-" + pos).rstrip("\n").split("\t")[-1])
             pos = int(pos)
             readnum = ceil(af_val * cover)
-            vcfsnv.append(f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t1500\tPASS\tAF={af_val:.2f}\tGT:AD:DV\t0/0:{cover-readnum}:{readnum}")
+            vcfsnv.append(f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t1500\tPASS\tAF={af_val}\tGT:AD:DV\t0/0:{cover-readnum}:{readnum}")
 
         with open(SNVvcf, "w") as f:
             f.write('\n'.join(vcfsnv))
@@ -345,7 +345,7 @@ def main():
             svlen = len(alt) - len(ref) if svtype == 'INS' else -(len(ref) - len(alt))
             end = int(pos) + abs(svlen)
             ID = f"SV{idx+1}"
-            vcfsv.append(f"{chrom}\t{pos}\t{ID}\t{ref}\t{alt}\t60\tPASS\tPRECISE;SVTYPE={svtype};SVLEN={svlen};END={end};AF={af:.2f}\tGT:GQ\t0/0:60")
+            vcfsv.append(f"{chrom}\t{pos}\t{ID}\t{ref}\t{alt}\t60\tPASS\tPRECISE;SVTYPE={svtype};SVLEN={svlen};END={end};AF={af}\tGT:GQ\t0/0:60")
 
         with open(SVvcf, "w") as f:
             f.write('\n'.join(vcfsv))
