@@ -62,21 +62,19 @@ seed = args.seed if args.seed is not None else 0
 npseed(seed)
 random.seed(seed)
 
-if sv_truth_file is None:
-    minAFsv = args.minimum_allele_frequency_sv if args.minimum_allele_frequency_sv is not None else 0.01
-    maxAFsv = args.maximum_allele_frequency_sv if args.maximum_allele_frequency_sv is not None else 0.05
-    numsv = args.number_of_svs if args.number_of_svs is not None else 50
-    minsvl = args.minimum_sv_length if args.minimum_sv_length is not None else 50
-    maxsvl = args.maximum_sv_length if args.maximum_sv_length is not None else 10000
-    insdel = args.insdel_sv_rate if args.insdel_sv_rate is not None else 0.7
+minAFsv = args.minimum_allele_frequency_sv if args.minimum_allele_frequency_sv is not None else 0.01
+maxAFsv = args.maximum_allele_frequency_sv if args.maximum_allele_frequency_sv is not None else 0.05
+numsv = args.number_of_svs if args.number_of_svs is not None else 50
+minsvl = args.minimum_sv_length if args.minimum_sv_length is not None else 50
+maxsvl = args.maximum_sv_length if args.maximum_sv_length is not None else 10000
+insdel = args.insdel_sv_rate if args.insdel_sv_rate is not None else 0.7
 
-if snv_truth_file is None:
-    minAFsnv = args.minimum_allele_frequency_snv if args.minimum_allele_frequency_snv is not None else 0.01
-    maxAFsnv = args.maximum_allele_frequency_snv if args.maximum_allele_frequency_snv is not None else 0.05
-    numsnv = args.number_of_snvs if args.number_of_snvs is not None else 200
-    maxsnvl = args.maximum_snv_length if args.maximum_snv_length is not None else 100
-    sub = args.substitution_rate if args.substitution_rate is not None else 1
-    insdelsnv = args.insdel_snv_rate if args.insdel_snv_rate is not None else 0.5
+minAFsnv = args.minimum_allele_frequency_snv if args.minimum_allele_frequency_snv is not None else 0.01
+maxAFsnv = args.maximum_allele_frequency_snv if args.maximum_allele_frequency_snv is not None else 0.05
+numsnv = args.number_of_snvs if args.number_of_snvs is not None else 200
+maxsnvl = args.maximum_snv_length if args.maximum_snv_length is not None else 100
+sub = args.substitution_rate if args.substitution_rate is not None else 1
+insdelsnv = args.insdel_snv_rate if args.insdel_snv_rate is not None else 0.5
 
 SVvcf = f"{output_prefix}_SV.vcf"
 SNVvcf = f"{output_prefix}_SNV.vcf"
