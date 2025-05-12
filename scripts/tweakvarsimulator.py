@@ -263,7 +263,7 @@ def main():
             print(f"Retrieving SNV {i+1}/{len(raw_snvloc)} from truth vcf...")
             chrom, pos, ref, alt, af_val = raw_snvloc[i]
             ##update the position
-            pos = str(pos+bp_shift)
+            pos = str(int(pos)+bp_shift)
             cover = int(depth(bam_path, '-r', chrom + ":" + pos + "-" + pos).rstrip("\n").split("\t")[-1])
             pos = int(pos)
             readnum = ceil(af_val * cover)
@@ -340,7 +340,7 @@ def main():
                 chrom, pos = record
                 ref, alt = 'N', genseq(minsvl, maxsvl) if choice([True, False], p=[insdel, 1-insdel]) else '<DEL>'
                 af = round(random.uniform(minAFsv, maxAFsv), count_decimals(minAFsv))
-            int(pos) + bp_shift
+            pos = str(int(pos) + bp_shift)
             svtype = 'INS' if len(alt) > len(ref) else 'DEL'
             svlen = len(alt) - len(ref) if svtype == 'INS' else -(len(ref) - len(alt))
             end = int(pos) + abs(svlen)
