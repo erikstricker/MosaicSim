@@ -1,4 +1,4 @@
-# SpikeVar & TweakVar: Simulation of Mosaic Variants in Sequencing Data
+# TweakVar: Simulation of Mosaic Variants in Empirical Sequencing Data
 
 **Hackathon team: Lead: Fritz Sedlazeck - Developers: Erik Stricker, Xinchang Zheng, Michal Izydorczyk, Chi-Lam Poon, Philippe Sanio, Farhang Jaryani, Joyjit Daw, Divya Kalra, Adam Alexander - Writers: Erik Stricker, Sontosh Deb**
 
@@ -15,7 +15,7 @@
 
 <img src="images/BackgroundMV.png"  style="width: auto; display: block; margin: auto;">
 
-In the context of individual genome comparison, mutations that appear within a small fraction of the population are considered rare variants[<sup>1</sup>](#1). When assessing a population of cells from a tissue of the same individual in turn, rare variants only present in a small fraction of the cells are defined as mosaic variants (MVs)[<sup>2</sup>](#2). Recent studies have shown that there is potential disease associations of for certain MVs[<sup>2</sup>](#2). However, MVs are challenging to detect because they are mixed in with data from the non-mutated cells and present in the same sequencing file. Therefore, several pipelines have been developed or adjusted to extract mosaic single nucleotide, structural or indel variants from whole genome sequencing data such as Sniffles[<sup>3</sup>](#3), DeepMosaic[<sup>4</sup>](#4), Mutect2[<sup>5</sup>](#5), DeepVariant[<sup>6</sup>](#6). To benchmark and validate the efficiency and accuracy of these methods, sequencing files with known MVs are necessary. We developed two simulation workflows called SpikeVar (*Spike* in *Var*iants from a second individual) and TweakVar (*Tweak* *Var*iants within existing reads of one individual), which output sequencing read files with artificial MVs and a ground truth annotation file for the MVs. SpikeVar accomplishes this by spiking in real reads from a sample at user-defined ratio into the sequencing file from a second sample. In contrast, TweakVar creates a list of random mutations and modifies a fraction of existing reads to match the user-defined MV frequency.
+In the context of individual genome comparison, mutations that appear within a small fraction of the population are considered rare variants[<sup>1</sup>](#1). When assessing a population of cells from a tissue of the same individual in turn, rare variants only present in a small fraction of the cells are defined as mosaic variants (MVs)[<sup>2</sup>](#2). Recent studies have shown that there is potential disease associations of for certain MVs[<sup>2</sup>](#2). However, MVs are challenging to detect because they are mixed in with data from the non-mutated cells and present in the same sequencing file. Therefore, several pipelines have been developed or adjusted to extract mosaic single nucleotide, structural or indel variants from whole genome sequencing data such as Sniffles[<sup>3</sup>](#3), DeepMosaic[<sup>4</sup>](#4), Mutect2[<sup>5</sup>](#5), DeepVariant[<sup>6</sup>](#6). To benchmark and validate the efficiency and accuracy of these methods, sequencing files with known MVs are necessary. We developed a simulation workflow TweakVar (*Tweak* *Var*iants within existing reads of one individual), which outputs sequencing read files with artificial MVs and a ground truth annotation file for the MVs. TweakVar accomplishes this by creating a list of random mutations and modifying a fraction of existing reads to match the user-defined MV frequency.
 
 
 ## Installation
@@ -77,13 +77,6 @@ module load bcftools-1.19
 ```
 
 ## Dependencies
-
-### SpikeVar
-- mosdepth 0.3.2
-- samtools 1.15.1
-- bcftools 1.19
-- Python 3.6.8
-- bcftools
   
 ### TweakVar
 - pysam (0.21.0) 
@@ -92,44 +85,7 @@ module load bcftools-1.19
 - samtools 1.15.1
 - bcftools 1.19
 
-## Tests
-
-The repository comes with unit tests to ensure correct setup and functioning of core libraries.
-
-To run the unit tests, please execute
-```
-python -m pytest tests/*
-```
-
 ## How to Use It
-
-### SpikeVar
-
-The spiked-in dataset simulates a sample with potential mosiac variants at a user-specified ratio. The re-genotyped VCFs of the samples and the VCF of the spiked-in dataset can be compared to evaluate AF < user-specified value.
-
-#### 1) SpikeVarDatabaseCreator - Generate Spiked-in Dataset
-
-<img src="images/SpikeVarDatabaseCreator.png"  height="150" align="right">  
-
-In this step, x% of mutations are strategically introduced from sample A to sample B. Both datasets are down-sampled and then merged to create a mixed dataset that represents a sequence read dataset with mosaic variants, including structural variations (SVs), single nucleotide variations (SNVs), and insertions/deletions (indels). 
-
-```
-./spike-in.sh <path to sampleA.bam> <path to sampleB.bam> <spike-in ratio x/100> <path to samtools binary> <path to mosdepth binary> <output dirpath> <path to script calculate_ratio.py>
-```
-#### 2) SpikeVarReporter - Filter Reads After Variant Allele Frequency Recalculation
-
-<img src="images/SpikeVarReporter.png"  height="250" align="right">  
-
-After creating the modified BAM file we have to re-calculate the variant allele frequency (VAF) for all variants.
-First, all variants stored from both VCF files must be merged and the VAF must be recalculated. 
-Depending on the variants we either start a SNV or SV caller, which can recalculate the VAF of each variant. 
-For SNVs, we are using bcftools mpileup. For SVs and short read data we are using Paragraph from Illumina and for long read data Sniffles2 is used.
-
-Last the re-genotyped VCF is filtered according to the VAF with a small Python script, which calculates the minor allele frequency (MAF) for each variant and lets a variant pass to the final output if the MAF is equal or greater than the use specified VAF.
-```
-./2b_re-genotyping_main.sh <VARIANT> <VAF> <sampleA.vcf> <sampleB.vcf> <sampleAandB.bam> output/path <ref.fa> <short|long>
-```
-#### 3) Run Your Favorite Mosaic Variant Caller and Compare Results
 
 ### TweakVar
 
@@ -240,49 +196,6 @@ longshot --bam <MOD_MERGED_BAM> --ref <REF> --out longshot_out.vcf --min_cov 3
 
 
 ## Example Implementation
-
-### SpikeVar
-
-Here, we use the SpikeVar workflow to automatically spike in sample HG002 at a 5% concentration into sample HG0733, to result in a 5% mosaic variant allele frequency (VAF). A downside is that the generated mixed .bam file will include 4 haplotype structures which cannot be corrected for. Furthermore, certain variants (e.g. HG002 variants) will not be presented at the targeted VAF. For example, heterozygous variants will not be represented by 5% VAF but rather at ~2.5% VAF. To account for this we re-genotype variants and report only variants that should be identifiable at the user-defined threshold or higher VAF.   
-
-#### 1) Fetch Data
-In order to spike in sample B into sample A, the pipeline first needs an initial set of aligned reads. We used HG002 and HG00733 datasets.
-
-Reads - `ftp://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/Ultralong_OxfordNanopore/guppy-V3.2.4_2020-01-22/HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam` and `ftp://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/Ultralong_OxfordNanopore/guppy-V3.2.4_2020-01-22/HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam.bai`
-
-
-#### 2) SpikeVarDatabaseCreator - Generate Spike-in Dataset
-We spiked 5% reads from HG0733 to HG002 for the next part of the workflow.
-```
-./spike-in.sh HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam HG007733.bam 0.05 /software/bin/samtools /software/bin/mosdepth /output `pwd`/calculate_ratio.py
-```
-#### 3) SpikeVarReporter - Filter Reads with >5% Variant Allele Frequency After Recalculation
-After creating the new BAM file from e.g. HG002 and HG00733, we have to re-calculate the variant allele frequency (VAF) for all variants.
-First we merge both VCF files from e.g. HG002 and HG00733 with bcftools. Depending on the variants we either start a SNV or SV caller, which can recalculate the VAF of each variant. 
-For SNVs we are using bcftools mpileup. For SVs and short read data we are using Paragraph from Illumina and for long read data Sniffles2 is used.
-
-```
-./2b_re-genotyping_main.sh SV 0.05 HG002_SV.Tier1.vcf HG00733_SV.Tier1.vcf /output/SPIKED.BAM ./ LONG hs37d5.fa
-```
-
-#### 4) Run Your Favorite Mosaic Variant Caller
-
-Run your choice of mosaic variant caller on the modified `HG002_ONT_hg37_chr5_HG00733_ONT_hg37_chr5_merged.sorted.bam` file and compare the results with the truth set `output_genotypes_filtered.vcf` file.
-
-#### 5) Results
-
-Your spiked in reads are now visible in the IGV genome browser. 
- 
-<img src="images/Spike_screenshot_sv.png"  align="center"> 
-<p align="center">
-<b>Example f a spiked in deletion.</b>
-</p>
-<br />
-
-<img src="images/Spike_screenshot_sv2_ins.png"  align="center">
-<p align="center">
-<b>Example of a spiked in inserton.</b>
-</p>  
 
 ### TweakVar
 
@@ -469,20 +382,7 @@ Below are 2 of several variants that overlapped between the ground truth and cal
 
 ## Method Description 
 
-### 1. SpikeVar - Generation of Sequencing Data With a Low Frequencing of Reads From Another Sample
-<img src="images/SpikeVarflowchart_updated.png" width="500"/>
-<p align="justify">
-<b>SpikeVar workflow, with major steps to assess the sensitivity and accuracy of the mosaic variant callers. (A, B: individual samples, A/B: merged samples, .bam and .vcf: input and output file formats in different steps, Black header boxes: tool or file names, Green header boxes: simulated files or final files used for validation comparisons)</b>
-</p>  
-
-<br />
-The SpikeVar workflow outputs a mixed sequencing read dataset in .bam format containing reads from one dominant sample and reads from another sample spiked in at a user-defined ratio corresponding to the simulated mosaic variant allele frequency (VAF) together with a .vcf file annotating the confirmed mosaic variant locations within the mixed dataset. The SpikeVarDatasetCreator takes aligned sequencing reads from sample A and sample B as the initial input. In this step, a spike-in methodology is applied to strategically introduce x% of mutations from one sample to another using <insert tool>. Accordingly, sample A is first down-sampled to retain 100-x% of its original reads, then sample B is down-sampled to x% considering the coverage differences between the samples. Using <insert tool>, both down-sampled datasets are then merged to create a mixed dataset that represents a sequence read dataset with mosaic variants, including structural variations (SVs), single nucleotide variations (SNVs), and insertions/deletions (indels).  
-
-The SpikeVarReporter then determines VAFs for each variant in the mixed dataset using <insert tool> based on the mixed variant locations derived by merging the .vcf files from sample A and sample B using <insert tool>. Variants with VAFs exceeding or equal to the introduced mutations (i.e., x%) are then selected to create a truth set for benchmarking using <insert tool>.  
- 
-To assess a mosaic variant caller’s sensitivity and accuracy, the same mixed dataset is used to call mosaic variants. The output mosaic variant locations and VAFs are then compared to the truth set for validation.  
-
-### 2. TweakVar - Creation of Sequencing Data With a Subset of Modified Reads
+### TweakVar - Creation of Sequencing Data With a Subset of Modified Reads
 <img src="images/TweakVar_flowchart_updated.png" width="500"/>
 <p align="justify">
 <b>TweakVar workflow, with major steps to assess the sensitivity and accuracy of the mosaic variant callers. (A, B: individual samples, A/B: merged samples, .bam and .vcf: input and output file formats in different steps, Black header boxes: tool or file names, Green header boxes: simulated files or final files used for validation comparisons)</b>
