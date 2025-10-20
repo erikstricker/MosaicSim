@@ -6,14 +6,14 @@
 
 
 ## Table of Contents
-|1. [Background](#background)<br>2. [Installation](#installation)<br>3. [Dependencies](#dependencies)<br>4. [Tests](#tests)<br>5. [How to Use It](#how-to-use-it)<br>6. [Example Implementation](#example-implementation)<br>7. [Method Description](#method-description)<br>8. [Contributers](#contributers)<br>9. [References](#references)<br><img width=1000/>|<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/TweakVar_workflow_simple.png"  style="width: auto; display: block; margin: auto;">|
+|1. [Background](#background)<br>2. [Installation](#installation)<br>3. [Dependencies](#dependencies)<br>4. [Tests](#tests)<br>5. [How to Use It](#how-to-use-it)<br>6. [Example Implementation](#example-implementation)<br>7. [Method Description](#method-description)<br>8. [Contributers](#contributers)<br>9. [References](#references)<br><img width=1000/>|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/TweakVar_workflow_simple.png"  style="width: auto; display: block; margin: auto;">|
 |:------|-:|
 
 
 
 ## Background
 
-<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/BackgroundMV.png"  style="width: auto; display: block; margin: auto;">
+<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/BackgroundMV.png"  style="width: auto; display: block; margin: auto;">
 
 In the context of individual genome comparison, mutations that appear within a small fraction of the population are considered rare variants[<sup>1</sup>](#1). When assessing a population of cells from a tissue of the same individual in turn, rare variants only present in a small fraction of the cells are defined as mosaic variants (MVs)[<sup>2</sup>](#2). Recent studies have shown that there is potential disease associations of for certain MVs[<sup>2</sup>](#2). However, MVs are challenging to detect because they are mixed in with data from the non-mutated cells and present in the same sequencing file. Therefore, several pipelines have been developed or adjusted to extract mosaic single nucleotide, structural or indel variants from whole genome sequencing data such as Sniffles[<sup>3</sup>](#3), DeepMosaic[<sup>4</sup>](#4), Mutect2[<sup>5</sup>](#5), DeepVariant[<sup>6</sup>](#6). To benchmark and validate the efficiency and accuracy of these methods, sequencing files with known MVs are necessary. We developed a simulation workflow TweakVar (*Tweak* *Var*iants within existing reads of one individual), which outputs sequencing read files with artificial MVs and a ground truth annotation file for the MVs. TweakVar accomplishes this by creating a list of random mutations and modifying a fraction of existing reads to match the user-defined MV frequency.
 
@@ -99,7 +99,7 @@ Before getting started ensure that:
 
 #### 1) TweakVarSimulator - Generate Simulated VCF
 
-<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/TweakVarSimulator.png" height="130" align="right">
+<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/TweakVarSimulator.png" height="130" align="right">
 
 The **TweakVarSimulator** generates a random set of mosaic variants, including **single nucleotide variants (SNVs)** and **structural variants (SVs)**. These variants can be customized by adjusting parameters such as **variant allele frequency (VAF)**, **the number of variants to simulate**, and **variant size**.
 
@@ -138,7 +138,7 @@ python tweakvarsimulator.py -i <path_to_bam> -T <path_to_ref> -o <output_path_pr
 
 #### 2) TweakVarEditor - Generate Edited Reads Based on Simulated VCF
 
-<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/TweakVarEditor.png"  height="200" align="right">
+<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/TweakVarEditor.png"  height="200" align="right">
 
 This command above takes in the VCF which determines which variants to introduce into the reads.
 The BAM file is used to find the reads which overlap with variant locations. Only a subset of the reads
@@ -180,7 +180,7 @@ python tweakvarmerger.py -b <input bam> -m <bam file with modified reads> -o <ou
 | `-o`, `--out_file`  | Output file name (default: `tweakvar_modified.bam` in the current directory) |
 
 
-<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/TweakVarMerger.png"  height="200" align="right">
+<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/TweakVarMerger.png"  height="200" align="right">
 
 #### 4) Run Your Favorite Mosaic Variant Caller and Compare Results
 For SV calling, we tried Sniffles:
@@ -372,18 +372,18 @@ Run you choice of mosaic variant caller on the modified `merged.modified_chr22.H
 The `chr22.HG002.GRCh38.2x250.bam` and `merged.modified_chr22.HG002.GRCh38.2x250.bam` were both visualized on IGV to get a subjective view of whether the modified reads led to mosaic variants being introduced and detected.
 Below are 2 of several variants that overlapped between the ground truth and caller VCF and were confirmed in the underlying data.
 
-<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/TweakVarMosaicSNV1.png" align="center"/>
+<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/TweakVarMosaicSNV1.png" align="center"/>
 <p align="center"><b>A mosaic SNV at position chr22:10961073</b></p>
 <br />
 
-<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/TweakVarMosaicSNV2.png" align="center"/>
+<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/TweakVarMosaicSNV2.png" align="center"/>
 <p align="center"><b>A mosaic SNV at position chr22:30088854</b></p>
 
 
 ## Method Description 
 
 ### TweakVar - Creation of Sequencing Data With a Subset of Modified Reads
-<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/TweakVar_flowchart_updated.png" width="500"/>
+<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/TweakVar_flowchart_updated.png" width="500"/>
 <p align="justify">
 <b>TweakVar workflow, with major steps to assess the sensitivity and accuracy of the mosaic variant callers. (A, B: individual samples, A/B: merged samples, .bam and .vcf: input and output file formats in different steps, Black header boxes: tool or file names, Green header boxes: simulated files or final files used for validation comparisons)</b>
 </p>  
@@ -400,13 +400,13 @@ The output of this pipeline is thus a modified BAM and a VCF file which provides
 ## Contributers
 
 
-|<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/Erik Stricker.jpg" width="150"/><br>Erik Stricker|<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/Chi-Lam Poon.jpg" width="150"/><br>Chi-Lam Poon|<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/Philippe Sanio.jpg" width="150"/><br>Philippe Sanio|<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/Xinchang Zheng.jpg" width="150"/><br>Xinchang Zheng|<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/Farhang Jaryani.png" width="150"/><br>Farhang Jaryani|
+|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Erik Stricker.jpg" width="150"/><br>Erik Stricker|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Chi-Lam Poon.jpg" width="150"/><br>Chi-Lam Poon|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Philippe Sanio.jpg" width="150"/><br>Philippe Sanio|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Xinchang Zheng.jpg" width="150"/><br>Xinchang Zheng|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Farhang Jaryani.png" width="150"/><br>Farhang Jaryani|
 |:-:|:-:|:-:|:-:|:-:|
 
-|<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/Joyjit Daw.png" width="150"/><br>Joyjit Daw |<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/Michal Bogumil Izydorczyk.png" width="150"/><br>Michal Izydorczyk|<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/Sontosh K Deb.jpg" width="150"/><br>Sontosh Deb|<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/Fritz Sedlazeck.jpg" width="150"/><br>Fritz Sedlazeck |<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/Alexander Adam.jpg" width="150"/><br>Adam Alexander|
+|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Joyjit Daw.png" width="150"/><br>Joyjit Daw |<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Michal Bogumil Izydorczyk.png" width="150"/><br>Michal Izydorczyk|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Sontosh K Deb.jpg" width="150"/><br>Sontosh Deb|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Fritz Sedlazeck.jpg" width="150"/><br>Fritz Sedlazeck |<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Alexander Adam.jpg" width="150"/><br>Adam Alexander|
 |:-:|:-:|:-:|:-:|:-:|
 
-|<img src="https://github.com/erikstricker/MosaicSim/tree/main/images/Divya Kalrai_placeholder.jpg" width="150"/><br>Divya Kalra|
+|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Divya Kalrai_placeholder.jpg" width="150"/><br>Divya Kalra|
 |:-:|
 
 
