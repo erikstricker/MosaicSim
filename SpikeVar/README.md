@@ -6,14 +6,14 @@
 
 
 ## Table of Contents
-|1. [Background](#background)<br>2. [Installation](#installation)<br>3. [Dependencies](#dependencies)<br>4. [Tests](#tests)<br>5. [How to Use It](#how-to-use-it)<br>6. [Example Implementation](#example-implementation)<br>7. [Method Description](#method-description)<br>8. [Contributers](#contributers)<br>9. [References](#references)<br><img width=1000/>|<img src="images/MosaicSim_workflows.png"  style="width: auto; display: block; margin: auto;">|
+|1. [Background](#background)<br>2. [Installation](#installation)<br>3. [Dependencies](#dependencies)<br>4. [Tests](#tests)<br>5. [How to Use It](#how-to-use-it)<br>6. [Example Implementation](#example-implementation)<br>7. [Method Description](#method-description)<br>8. [Contributers](#contributers)<br>9. [References](#references)<br><img width=1000/>|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/SpikeVar_workflow_simple.png"  style="width: auto; display: block; margin: auto;">|
 |:------|-:|
 
 
 
 ## Background
 
-<img src="images/BackgroundMV.png"  style="width: auto; display: block; margin: auto;">
+<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/BackgroundMV.png"  style="width: auto; display: block; margin: auto;">
 
 In the context of individual genome comparison, mutations that appear within a small fraction of the population are considered rare variants[<sup>1</sup>](#1). When assessing a population of cells from a tissue of the same individual in turn, rare variants only present in a small fraction of the cells are defined as mosaic variants (MVs)[<sup>2</sup>](#2). Recent studies have shown that there is potential disease associations of for certain MVs[<sup>2</sup>](#2). However, MVs are challenging to detect because they are mixed in with data from the non-mutated cells and present in the same sequencing file. Therefore, several pipelines have been developed or adjusted to extract mosaic single nucleotide, structural or indel variants from whole genome sequencing data such as Sniffles[<sup>3</sup>](#3), DeepMosaic[<sup>4</sup>](#4), Mutect2[<sup>5</sup>](#5), DeepVariant[<sup>6</sup>](#6). To benchmark and validate the efficiency and accuracy of these methods, sequencing files with known MVs are necessary. We developed two simulation workflows called SpikeVar (*Spike* in *Var*iants from a second individual) and TweakVar (*Tweak* *Var*iants within existing reads of one individual), which output sequencing read files with artificial MVs and a ground truth annotation file for the MVs. SpikeVar accomplishes this by spiking in real reads from a sample at user-defined ratio into the sequencing file from a second sample. In contrast, TweakVar creates a list of random mutations and modifies a fraction of existing reads to match the user-defined MV frequency.
 
@@ -95,7 +95,7 @@ The spiked-in dataset simulates a sample with potential mosiac variants at a use
 
 #### 1) SpikeVarDatabaseCreator - Generate Spiked-in Dataset
 
-<img src="images/SpikeVarDatabaseCreator.png"  height="150" align="right">  
+<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/SpikeVarDatabaseCreator.png"  height="150" align="right">  
 
 In this step, x% of mutations are strategically introduced from sample A to sample B. Both datasets are down-sampled and then merged to create a mixed dataset that represents a sequence read dataset with mosaic variants, including structural variations (SVs), single nucleotide variations (SNVs), and insertions/deletions (indels). 
 
@@ -104,7 +104,7 @@ In this step, x% of mutations are strategically introduced from sample A to samp
 ```
 #### 2) SpikeVarReporter - Filter Reads After Variant Allele Frequency Recalculation
 
-<img src="images/SpikeVarReporter.png"  height="250" align="right">  
+<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/SpikeVarReporter.png"  height="250" align="right">  
 
 After creating the modified BAM file we have to re-calculate the variant allele frequency (VAF) for all variants.
 First, all variants stored from both VCF files must be merged and the VAF must be recalculated. 
@@ -151,13 +151,13 @@ Run your choice of mosaic variant caller on the modified `HG002_ONT_hg37_chr5_HG
 
 Your spiked in reads are now visible in the IGV genome browser. 
  
-<img src="images/Spike_screenshot_sv.png"  align="center"> 
+<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Spike_screenshot_sv.png"  align="center"> 
 <p align="center">
 <b>Example f a spiked in deletion.</b>
 </p>
 <br />
 
-<img src="images/Spike_screenshot_sv2_ins.png"  align="center">
+<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Spike_screenshot_sv2_ins.png"  align="center">
 <p align="center">
 <b>Example of a spiked in inserton.</b>
 </p>  
@@ -165,7 +165,7 @@ Your spiked in reads are now visible in the IGV genome browser.
 ## Method Description 
 
 ### SpikeVar - Generation of Sequencing Data With a Low Frequencing of Reads From Another Sample
-<img src="images/SpikeVarflowchart_updated.png" width="500"/>
+<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/SpikeVarflowchart_updated.png" width="500"/>
 <p align="justify">
 <b>SpikeVar workflow, with major steps to assess the sensitivity and accuracy of the mosaic variant callers. (A, B: individual samples, A/B: merged samples, .bam and .vcf: input and output file formats in different steps, Black header boxes: tool or file names, Green header boxes: simulated files or final files used for validation comparisons)</b>
 </p>  
@@ -180,13 +180,13 @@ To assess a mosaic variant caller’s sensitivity and accuracy, the same mixed d
 ## Contributers
 
 
-|<img src="images/Erik Stricker.jpg" width="150"/><br>Erik Stricker|<img src="images/Chi-Lam Poon.jpg" width="150"/><br>Chi-Lam Poon|<img src="images/Philippe Sanio.jpg" width="150"/><br>Philippe Sanio|<img src="images/Xinchang Zheng.jpg" width="150"/><br>Xinchang Zheng|<img src="images/Farhang Jaryani.png" width="150"/><br>Farhang Jaryani|
+|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Erik Stricker.jpg" width="150"/><br>Erik Stricker|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Chi-Lam Poon.jpg" width="150"/><br>Chi-Lam Poon|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Philippe Sanio.jpg" width="150"/><br>Philippe Sanio|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Xinchang Zheng.jpg" width="150"/><br>Xinchang Zheng|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Farhang Jaryani.png" width="150"/><br>Farhang Jaryani|
 |:-:|:-:|:-:|:-:|:-:|
 
-|<img src="images/Joyjit Daw.png" width="150"/><br>Joyjit Daw |<img src="images/Michal Bogumil Izydorczyk.png" width="150"/><br>Michal Izydorczyk|<img src="images/Sontosh K Deb.jpg" width="150"/><br>Sontosh Deb|<img src="images/Fritz Sedlazeck.jpg" width="150"/><br>Fritz Sedlazeck |<img src="images/Alexander Adam.jpg" width="150"/><br>Adam Alexander|
+|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Joyjit Daw.png" width="150"/><br>Joyjit Daw |<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Michal Bogumil Izydorczyk.png" width="150"/><br>Michal Izydorczyk|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Sontosh K Deb.jpg" width="150"/><br>Sontosh Deb|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Fritz Sedlazeck.jpg" width="150"/><br>Fritz Sedlazeck |<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Alexander Adam.jpg" width="150"/><br>Adam Alexander|
 |:-:|:-:|:-:|:-:|:-:|
 
-|<img src="images/Divya Kalrai_placeholder.jpg" width="150"/><br>Divya Kalra|
+|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Divya Kalrai_placeholder.jpg" width="150"/><br>Divya Kalra|
 |:-:|
 
 
