@@ -164,7 +164,7 @@ python tweakvareditor.py -v <simulated_vcf> -b <path_to_bam> -T <path_to_ref> -o
 
 #### 3) TweakVarMerger - Re-Align Modified Reads and Merge Them
 
-Replace the reads in the original dataset with the modified reads. This step is time intensive so make sure to run it in a cluster environment for lage files.
+Replace the reads in the original dataset with the modified reads. This step is time intensive so make sure to run it in a cluster environment for large files.
 
 ##### Usage
 ```bash
