@@ -135,6 +135,10 @@ python tweakvarsimulator.py -i <path_to_bam> -T <path_to_ref> -o <output_path_pr
 | `-insdelsnv, --insdel_snv_rate` | **Probability of generating an insertion vs. a deletion** in SNVs. A value of **0.5** means equal chances of insertion and deletion. | `0.5` |
 | `-insdel, --insdel_sv_rate` | **Probability of generating an insertion vs. a deletion** in SVs. A value of **0.7** means insertions are more likely than deletions. | `0.7` |
 | `--ref_chroms` | List of **chromosomes to include** in the simulation (e.g., `chr1 chr2 ... chrY`). Only these chromosomes will be used for variant generation. | *All chromosomes in the BAM header* |
+| `-snv, --SNV_truth_file` | SNV truth file of which variant locations, allele frequencies, and alternate alleles are used as the foundation to create a new SNV VCF file with updated coverage and read count information. | Will be ignored if not present. |
+| `-sv, --SV_truth_file` | SV truth file of which variant locations, allele frequencies, and alternate alleles are used as the foundation to create a new SV VCF file with updated coverage and read count information. | Will be ignored if not present. |
+| `-bps, --bp_shift` | Allows the shift of all bp positions up- or downstream by the indicated number of bps. | `0` |
+| `-imc, --ignore_minimum_cov` | Ignores minimum coverage requirement for the selection of variant loci. This is especially useful when selecting identical regions in down-sampled files. | `FALSE` |
 
 #### 2) TweakVarEditor - Generate Edited Reads Based on Simulated VCF
 
