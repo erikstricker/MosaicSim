@@ -34,8 +34,6 @@ parser.add_argument("-insdel", "--insdel_sv_rate", type=float, required=False)
 parser.add_argument("--ref_chroms", nargs='+', help="Optional list of reference chromosomes")
 parser.add_argument("-snv", "--SNV_truth_file", required=False, help="Optional SNV truth VCF file")
 parser.add_argument("-sv", "--SV_truth_file", required=False, help="Optional SV truth VCF file")
-
-##Secret arguments
 parser.add_argument("-bps", "--bp_shift", type=int,  required=False, help="Optionally allows you to shift all bp positions up or downstream by the indicated number of bps")
 parser.add_argument("-imc", "--ignore_minimum_cov", type=bool, required=False, help="If True, loci will not be evaluated for minimum coverage")
 
