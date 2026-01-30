@@ -219,7 +219,7 @@ wget -P $HOME/data https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data
 Reference
 ```
 mkdir $HOME/data/ref 
-wget -P $HOME/data/refhttps://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/references/GRCh38/GRCh38_masked_v2_decoy_gene.fasta.gz 
+wget -P $HOME/data/ref https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/references/GRCh38/GRCh38_masked_v2_decoy_gene.fasta.gz 
 ```
 
 
