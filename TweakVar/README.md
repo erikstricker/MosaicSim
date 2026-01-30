@@ -104,7 +104,7 @@ Before getting started ensure that:
 The **TweakVarSimulator** generates a random set of mosaic variants, including **single nucleotide variants (SNVs)** and **structural variants (SVs)**. These variants can be customized by adjusting parameters such as **variant allele frequency (VAF)**, **the number of variants to simulate**, and **variant size**.
 
 The output is a **VCF file in Sniffles format**, which serves as:  
-- **Input** for the read editor step (described below) to modify sequencing reads by inserting the simulated variants.  
+- **Input** for the read  step (described below) to modify sequencing reads by inserting the simulated variants.  
 - **Ground truth** for evaluating mosaic variant callers.  
 
 ##### Usage
@@ -260,7 +260,7 @@ This command:
 - Outputs simulated VCFs to `test_output_dir/chr22`.  
 - Sets a **random seed of 0** for reproducibility.  
 
-#### 3) TweakVarEditor - Add Modified Reads Back In
+#### 2) TweakVarEditor - Add Modified Reads Back In
 
 Generate a set of modified reads with inserted variants.
 ```
@@ -292,7 +292,7 @@ python  scripts/tweakvareditor.py \
  -of "fastq"
 ```
 
-#### 4) TweakVarMerger - Re-Align Modified Reads and Merge Them
+#### 3) TweakVarMerger - Re-Align Modified Reads and Merge Them
 
 Once the new reads are generated in BAM format, we then remove the old alignments with the same IDs of modified reads in the original BAM file, then insert the new alignments of modified reads back into this BAM file.
 ```
@@ -367,11 +367,11 @@ python  scripts/tweakvarmerger.py \
  -o $HOME/test_output_dir/chr22/merged.modified_chr22.HG002.GRCh38.2x250.bam
 ```
 
-#### 5) Run Your Favorite Mosaic Variant Caller
+#### 4) Run Your Favorite Mosaic Variant Caller
 
 Run you choice of mosaic variant caller on the modified `merged.modified_chr22.HG002_hs37d5_ONT-UL_GIAB_20200122.phased.bam` file and compare the results with the simulated `chr22_HG002_hs37d5_ONT-UL_GIAB_20200122.phased_MAF0.01-0.05_SNV.vcf` file.
 
-#### 6) Results
+#### 5) Results
 
 The `chr22.HG002.GRCh38.2x250.bam` and `merged.modified_chr22.HG002.GRCh38.2x250.bam` were both visualized on IGV to get a subjective view of whether the modified reads led to mosaic variants being introduced and detected.
 Below are 2 of several variants that overlapped between the ground truth and caller VCF and were confirmed in the underlying data.
