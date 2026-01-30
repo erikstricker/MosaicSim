@@ -51,7 +51,7 @@ git clone https://github.com/erikstricker/MosaicSim.git
 
 To install the relevant python dependencies, run
 ```
-REPO_ROOT="$HOME/MosaicSim/"
+REPO_ROOT="$HOME/MosaicSim"
 
 pip install -r $REPO_ROOT/requirements.txt
 ```
@@ -240,7 +240,7 @@ samtools index $HOME/data/chr22.HG002.GRCh38.2x250.bam
 #### 1) TweakVarSimulator - Generate Variants and Modified Reads
 
 Then we simulate variants
-```
+
 ## Example Usage
 ```bash
 module load anaconda3/2024.02
