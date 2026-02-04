@@ -228,6 +228,12 @@ def vcf_number_variants_fastq_out(input_vcf_file, input_bam_file, refs, outfile)
 def main():
     args=argument_parser()
     refs = read_ref(args.ref_file)
+	# Get the directory name from the file path
+    out_dir = os.path.dirname(args.out_file)
+    
+    # Create the directory if it doesn't exist (and if out_dir is not empty)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
     output_format = args.output_format
     if args.output_format is None:
         output_format = "bam"
