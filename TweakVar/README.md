@@ -55,47 +55,46 @@ REPO_ROOT="$HOME/MosaicSim"
 
 pip install -r $REPO_ROOT/requirements.txt
 ```
-Ensure to also load mosdepth>0.3.2 (for SpikeVar), samtools >1.15.1, and bcftools>1.19
+Ensure to also load samtools ≥1.17, and bcftools≥1.17
 
-Once the requirements are installed, please install or load the following additional packages
+Once the requirements are installed, please install or load the following additional packages. If you work in a cluster with the packages already installed, you can load the path or module directly.
 
 _Installation_
 ```
-conda install -c bioconda samtools bcftools mosdepth
+conda install -c bioconda samtools bcftools
 ```
 _Loading (e.g.)_
 ```
-export PATH=/path/to/software/mosdepth/mosdepth-0.3.2/bin:$PATH
-export PATH=/path/to/software/samtools/samtools-1.21/bin:$PATH
-export PATH=/path/to/software/bcftools/bcftools-1.19/bin:$PATH
+export PATH=/path/to/software/samtools/samtools-1.17/bin:$PATH
+export PATH=/path/to/software/bcftools/bcftools-1.17/bin:$PATH
 ```
 or
 ```
-module load mosdepth-0.3.2
-module load samtools-1.21
-module load bcftools-1.19
+module load samtools
+module load bcftools
 ```
 
 ## Dependencies
   
 ### TweakVar
-- pysam (0.21.0) 
-- numpy (1.25.2)
-- biopython (1.81)
-- samtools 1.15.1
-- bcftools 1.19
+- pysam 0.21.0)
+- numpy ≥1.24.3
+- biopython 1.81
+- samtools ≥1.17
+- bcftools ≥1.17
 
 ## How to Use It
 
 ### TweakVar
 
-Once the Python dependencies are installed, the scripts can be run directly from the `scripts` subfolder.
+Once the Python dependencies are installed, the scripts can be run directly from the `TweakVar` subfolder.
 
 #### 0) TweakVar Prep
 
 Before getting started ensure that:
 * The input file is in bam format with corresponding index (.bai) file
 * The corresponding fasta reference file is downloaded with appropriate index (.fai) file
+We recommend creating a folder called `mosaicsim_files` in your home directory with `data` and `data/ref` subdirectories for better organization.
 
 #### 1) TweakVarSimulator - Generate Simulated VCF
 
@@ -211,15 +210,15 @@ In order to simulate and edit reads, the pipeline first needs an initial set of 
 
 Reads (bam file)
 ```
-mkdir $HOME/data ##or your data folder
-wget -P $HOME/data https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/NIST_Illumina_2x250bps/novoalign_bams/HG002.GRCh38.2x250.bam
-wget -P $HOME/data https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/NIST_Illumina_2x250bps/novoalign_bams/HG002.GRCh38.2x250.bam.bai
+mkdir -p $HOME/mosaicsim_files/data ##or your data folder
+wget -P $HOME/mosaicsim_files/data https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/NIST_Illumina_2x250bps/novoalign_bams/HG002.GRCh38.2x250.bam
+wget -P $HOME/mosaicsim_files/data https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/NIST_Illumina_2x250bps/novoalign_bams/HG002.GRCh38.2x250.bam.bai
 ```
 
 Reference
 ```
-mkdir $HOME/data/ref 
-wget -P $HOME/data/ref https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/references/GRCh38/GRCh38_masked_v2_decoy_gene.fasta.gz 
+mkdir $HOME/mosaicsim_files/data/ref ##or your data folder
+wget -P $HOME/mosaicsim_files/data/ref https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/references/GRCh38/GRCh38_masked_v2_decoy_gene.fasta.gz 
 ```
 
 
@@ -229,11 +228,11 @@ gunzip $HOME/data/ref/GRCh38_masked_v2_decoy_gene.fasta.gz
 samtools faidx $HOME/data/ref/GRCh38_masked_v2_decoy_gene.fasta
 ```
 
-We run the demonstration on chr22 only, so the dataset is filtered using
+We run the demonstration on chr22 only, to reduce the size of the input files and run times for this tutorial. Therefore, we filter the input for the smallest human chromosome (chr22) first.
 ```
-samtools view -b $HOME/data/HG002.GRCh38.2x250.bam chr22 \
-  | samtools sort -o $HOME/data/chr22.HG002.GRCh38.2x250.bam
-samtools index $HOME/data/chr22.HG002.GRCh38.2x250.bam
+samtools view -b $HOME/mosaicsim_files/data/HG002.GRCh38.2x250.bam chr22 \
+  | samtools sort -o $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam
+samtools index $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam
 ```
 
 
@@ -248,10 +247,10 @@ module load python
 conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
-python scripts/tweakvarsimulator.py \
- -i $HOME/data/chr22.HG002.GRCh38.2x250.bam \
- -T $HOME/data/ref/GRCh38_masked_v2_decoy_gene.fasta \
- -o $HOME/test_output_dir/chr22/chr22.HG002.GRCh38.2x250_MAF0.01-0.05 \
+python TweakVar/tweakvarsimulator.py \
+ -i $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam \
+ -T $HOME/mosaicsim_files/data/ref/GRCh38_masked_v2_decoy_gene.fasta \
+ -o $HOME/results/chr22_HG0002_srWGS_test/chr22.HG002.GRCh38.2x250_MAF0.01-0.05 \
  -s 0 -numsv 5 -numsnv 100
 ```
 
@@ -269,11 +268,11 @@ module load python
 conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
-python  scripts/tweakvareditor.py \
- -v $HOME/test_output_dir/chr22/chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.vcf \
- -b $HOME/data/chr22.HG002.GRCh38.2x250.bam \
- -T $HOME/data/ref/GRCh38_masked_v2_decoy_gene.fasta  \
- -o $HOME/test_output_dir/chr22/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.bam \
+python  TweakVar/tweakvareditor.py \
+ -v $HOME/results/chr22_HG0002_srWGS_test/chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.vcf \
+ -b $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam \
+ -T $HOME/mosaicsim_files/data/ref/GRCh38_masked_v2_decoy_gene.fasta  \
+ -o $HOME/results/chr22_HG0002_srWGS_test/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.bam \
  -of "bam"
 ```
 
@@ -284,11 +283,11 @@ module load python
 conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
-python  scripts/tweakvareditor.py \
- -v $HOME/test_output_dir/chr22/chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.vcf \
- -b $HOME/data/chr22.HG002.GRCh38.2x250.bam \
- -T $HOME/data/ref/GRCh38_masked_v2_decoy_gene.fasta  \
- -o $HOME/test_output_dir/chr22/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq \
+python  TweakVar/tweakvareditor.py \
+ -v $HOME/results/chr22_HG0002_srWGS_test/chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.vcf \
+ -b $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam \
+ -T $HOME/mosaicsim_files/data/ref/GRCh38_masked_v2_decoy_gene.fasta  \
+ -o $HOME/results/chr22_HG0002_srWGS_test/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq \
  -of "fastq"
 ```
 
@@ -301,19 +300,19 @@ module load python
 conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
-python  scripts/tweakvarmerger.py \
- -b $HOME/data/chr22.HG002.GRCh38.2x250.bam \
- -m $HOME/test_output_dir/chr22/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.bam \
- -o $HOME/test_output_dir/chr22/merged.modified_chr22.HG002.GRCh38.2x250.bam
+python  TweakVar/tweakvarmerger.py \
+ -b $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam \
+ -m $HOME/results/chr22_HG0002_srWGS_test/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.bam \
+ -o $HOME/results/chr22_HG0002_srWGS_test/merged.modified_chr22.HG002.GRCh38.2x250.bam
 ```
 
 If the reads were generated in FASTQ format, they need to be re-aligned using a tool like minimap2 and then re-inserted back into the dataset by replacing the original reads.
 
 We can use `minimap2` for both short-read and long-read alignment. In the example, we tested on chromosome 22.
 ```
-input_fastq="$HOME/test_output_dir/chr22/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq"
-output_bam="$HOME/test_output_dir/chr22/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq.bam"
-reference="$HOME/data/ref/GRCh38_masked_v2_decoy_gene.fasta"
+input_fastq="$HOME/results/chr22_HG0002_srWGS_test/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq"
+output_bam="$HOME/results/chr22_HG0002_srWGS_test/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq.bam"
+reference="$HOME/mosaicsim_files/data/ref/GRCh38_masked_v2_decoy_gene.fasta"
 ```
 Choose the alignment setting that best fits your needs: 
 ***short read - standard***
@@ -362,9 +361,9 @@ conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
 python  scripts/tweakvarmerger.py \
- -b $HOME/data/chr22.HG002.GRCh38.2x250.bam \
- -m $HOME/test_output_dir/chr22/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq.bam \
- -o $HOME/test_output_dir/chr22/merged.modified_chr22.HG002.GRCh38.2x250.bam
+ -b $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam \
+ -m $HOME/results/chr22_HG0002_srWGS_test/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq.bam \
+ -o $HOME/results/chr22_HG0002_srWGS_test/merged.modified_chr22.HG002.GRCh38.2x250.bam
 ```
 
 #### 4) Run Your Favorite Mosaic Variant Caller
