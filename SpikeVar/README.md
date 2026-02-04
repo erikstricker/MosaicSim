@@ -6,7 +6,7 @@
 
 
 ## Table of Contents
-|1. [Background](#background)<br>2. [Installation](#installation)<br>3. [Dependencies](#dependencies)<br>4. [Tests](#tests)<br>5. [How to Use It](#how-to-use-it)<br>6. [Example Implementation](#example-implementation)<br>7. [Method Description](#method-description)<br>8. [Contributers](#contributers)<br>9. [References](#references)<br><img width=1000/>|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/SpikeVar_workflow_simple.png"  style="width: auto; display: block; margin: auto;">|
+|1. [Background](#background)<br>2. [Installation](#installation)<br>3. [Dependencies](#dependencies)<br>4. [Tests](#tests)<br>5. [How to Use It](#how-to-use-it)<br>6. [Example Implementation](#example-implementation)<br>7. [Method Deion](#method-description)<br>8. [Contributers](#contributers)<br>9. [References](#references)<br><img width=1000/>|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/SpikeVar_workflow_simple.png"  style="width: auto; display: block; margin: auto;">|
 |:------|-:|
 
 
@@ -99,7 +99,7 @@ The spiked-in dataset simulates a sample with potential mosiac variants at a use
 In this step, x% of mutations are strategically introduced from sample A to sample B. Both datasets are down-sampled and then merged to create a mixed dataset that represents a sequence read dataset with mosaic variants, including structural variations (SVs), single nucleotide variations (SNVs), and insertions/deletions (indels). 
 
 ```
-./spike-in.sh <path to sampleA.bam> <path to sampleB.bam> <spike-in ratio x/100> <path to samtools binary> <path to mosdepth binary> <output dirpath> <path to script calculate_ratio.py>
+./spike-in.sh <path to sampleA.bam> <path to sampleB.bam> <spike-in ratio x/100> <path to samtools binary> <path to mosdepth binary> <output dirpath> <path to  calculate_ratio.py>
 ```
 #### 2) SpikeVarReporter - Filter Reads After Variant Allele Frequency Recalculation
 
@@ -110,7 +110,7 @@ First, all variants stored from both VCF files must be merged and the VAF must b
 Depending on the variants we either start a SNV or SV caller, which can recalculate the VAF of each variant. 
 For SNVs, we are using bcftools mpileup. For SVs and short read data we are using Paragraph from Illumina and for long read data Sniffles2 is used.
 
-Last the re-genotyped VCF is filtered according to the VAF with a small Python script, which calculates the minor allele frequency (MAF) for each variant and lets a variant pass to the final output if the MAF is equal or greater than the use specified VAF.
+Last the re-genotyped VCF is filtered according to the VAF with a small Python , which calculates the minor allele frequency (MAF) for each variant and lets a variant pass to the final output if the MAF is equal or greater than the use specified VAF.
 ```
 ./2b_re-genotyping_main.sh <VARIANT> <VAF> <sampleA.vcf> <sampleB.vcf> <sampleAandB.bam> output/path <ref.fa> <short|long>
 ```
@@ -161,7 +161,7 @@ Your spiked in reads are now visible in the IGV genome browser.
 <b>Example of a spiked in inserton.</b>
 </p>  
 
-## Method Description 
+## Method Deion 
 
 ### SpikeVar - Generation of Sequencing Data With a Low Frequencing of Reads From Another Sample
 <img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/SpikeVarflowchart_updated.png" width="500"/>
