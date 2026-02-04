@@ -51,46 +51,47 @@ git clone https://github.com/erikstricker/MosaicSim.git
 
 To install the relevant python dependencies, run
 ```
-REPO_ROOT="$HOME/MosaicSim/"
+REPO_ROOT="$HOME/MosaicSim"
 
 pip install -r $REPO_ROOT/requirements.txt
 ```
-Ensure to also load mosdepth>0.3.2 (for SpikeVar), samtools >1.15.1, and bcftools>1.19
+Ensure to also load mosdepth≥0.3.2 (for SpikeVar), samtools ≥1.17, and bcftools≥1.17
 
-Once the requirements are installed, please install or load the following additional packages
+Once the requirements are installed, please install or load the following additional packages. If you work in a cluster with the packages already installed, you can load the path or module directly.
 
 _Installation_
+
 ```
 conda install -c bioconda samtools bcftools mosdepth
 ```
+
 _Loading (e.g.)_
 ```
 export PATH=/path/to/software/mosdepth/mosdepth-0.3.2/bin:$PATH
-export PATH=/path/to/software/samtools/samtools-1.21/bin:$PATH
-export PATH=/path/to/software/bcftools/bcftools-1.19/bin:$PATH
+export PATH=/path/to/software/samtools/samtools-1.17/bin:$PATH
+export PATH=/path/to/software/bcftools/bcftools-1.17/bin:$PATH
 ```
 or
 ```
-module load mosdepth-0.3.2
-module load samtools-1.21
-module load bcftools-1.19
+module load mosdepth
+module load samtools
+module load bcftools
 ```
 
 ## Dependencies
 
 ### SpikeVar
 - mosdepth 0.3.2
-- samtools 1.15.1
-- bcftools 1.19
-- Python 3.6.8
-- bcftools
+- samtools ≥1.17
+- bcftools ≥1.17
+- Python 3.10
   
 ### TweakVar
-- pysam (0.21.0) 
-- numpy (1.25.2)
-- biopython (1.81)
-- samtools 1.15.1
-- bcftools 1.19
+- pysam 0.21.0)
+- numpy ≥1.24.3
+- biopython 1.81
+- samtools ≥1.17
+- bcftools ≥1.17
 
 ## Contributers
 
