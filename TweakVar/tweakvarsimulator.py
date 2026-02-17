@@ -122,11 +122,11 @@ def genlocSNV(num,bam_path,mincov=20):
     for i in range(num):
         print(f"Creating SNV {i+1}/{num}...")
         while True:
+            ranchrom=nran.choice(chrom)
+            loc=str(nran.randint(0,chromol[ranchrom])+bp_shift)
             ref_base = ref_fasta.fetch(ranchrom, int(loc)-1, int(loc)).upper()
             if ref_base not in ['A', 'C', 'G', 'T']:
                 continue # It's an N or a gap, try a new location
-            ranchrom=nran.choice(chrom)
-            loc=str(nran.randint(0,chromol[ranchrom])+bp_shift)
             try:
                 cover=int(depth(bam_path,'-r',ranchrom+":"+loc+"-"+loc).rstrip("\n").split("\t")[-1])
             except ValueError:
