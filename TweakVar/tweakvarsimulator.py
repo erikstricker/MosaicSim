@@ -13,7 +13,7 @@ import random
 parser = argparse.ArgumentParser(description="TweakVarSimulator: A tool for simulating variants")
 
 # Required arguments
-parser.add_argument("-i", "--input", required=True, help="Path to input BAM file")
+parser.add_argument("-i", "--input", required=True, help="Path to input BAM file or ")
 parser.add_argument("-T", "--reference", required=True, help="Path to reference genome")
 parser.add_argument("-o", "--output", required=True, help="Output file prefix")
 
@@ -246,51 +246,95 @@ def genseq(minl,maxl):
 def main():
     chromol, chrom = get_chrom_lengths(bam_path)
 
-    # SNV processing
+   # SNV processing
     if snv_truth_file is not None:
         raw_snvloc = parse_truth_vcf(snv_truth_file)
 
         vcfsnv = [
             '##fileformat=VCFv4.2',
             '##FILTER=<ID=PASS,Description="All filters passed">',
+            '##FILTER=<ID=FAIL,Description="Failed minimum coverage">',
             '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
             '##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Read depth for each allele">',
             '##FORMAT=<ID=DV,Number=1,Type=Integer,Description="Number of variant reads">',
-            '##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">'
+            '##INFO=<ID=AF,Number=A,Type=Float,Description="Target Allele Frequency">',
+            '##INFO=<ID=EAF,Number=A,Type=Float,Description="Exact Allele Frequency (variant reads / total depth)">' # Added EAF
         ]
         vcfsnv.extend([f'##contig=<ID={c},length={l}>' for c, l in chromol.items()])
 
         vcfsnv.append('\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE']))
+
+        vcfsnv_failed = vcfsnv.copy()
+        
+        # Save the number of header lines so we know if variants were added later
+        header_len = len(vcfsnv) 
+
         snvloc = []
         for i in range(len(raw_snvloc)):
             print(f"Retrieving SNV {i+1}/{len(raw_snvloc)} from truth vcf...")
             chrom, pos, ref, alt, af_val = raw_snvloc[i]
-            ##update the position
+            
+            ## update the position
             pos = str(int(pos)+bp_shift)
-            cover = int(depth(bam_path, '-r', chrom + ":" + pos + "-" + pos).rstrip("\n").split("\t")[-1])
+            
+            ## Failsafe coverage calculation
+            try:
+                cover = int(depth(bam_path, '-r', chrom + ":" + pos + "-" + pos).rstrip("\n").split("\t")[-1])
+            except ValueError:
+                cover = 0 
+                
             pos = int(pos)
-            readnum = ceil(af_val * cover)
-            vcfsnv.append(f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t1500\tPASS\tAF={af_val}\tGT:AD:DV\t0/0:{cover-readnum}:{readnum}")
+            
+            ## Test for minimum coverage requirement
+            if not ignore_minimum_cov and cover < mincov:
+                # EAF is 0.0 because no variant reads are simulated for failed loci
+                vcfsnv_failed.append(f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t1500\tFAIL\tAF={af_val};EAF=0.0\tGT:AD:DV\t0/0:{cover}:0")
+            else:
+                readnum = ceil(af_val * cover)
+                # Calculate exact AF (prevent division by zero just in case)
+                exact_af = round(readnum / cover, 4) if cover > 0 else 0.0
+                
+                # Append with both AF and EAF in the INFO string
+                vcfsnv.append(f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t1500\tPASS\tAF={af_val};EAF={exact_af}\tGT:AD:DV\t0/0:{cover-readnum}:{readnum}")
 
+        # --- File Writing Logic ---
+
+        # Write the main passing VCF
         with open(SNVvcf, "w") as f:
-            f.write('\n'.join(vcfsnv))
-        f.close()
-
+            f.write('\n'.join(vcfsnv) + '\n')
+            
         print(f"New SNV truth vcf written to {SNVvcf}.")
+
+        # Check if the failed list has any actual variants (is longer than the header)
+        if len(vcfsnv_failed) > header_len:
+            # Safely replace the .vcf extension
+            if SNVvcf.endswith('.vcf'):
+                failed_SNVvcf = SNVvcf[:-4] + '_failed.vcf'
+            else:
+                failed_SNVvcf = SNVvcf + '_failed.vcf'
+                
+            with open(failed_SNVvcf, "w") as f:
+                f.write('\n'.join(vcfsnv_failed) + '\n')
+                
+            # Quick math to show how many failed
+            num_failed = len(vcfsnv_failed) - header_len
+            print(f"Found {num_failed} SNVs below minimum coverage. Written to {failed_SNVvcf}.")
+            
     else:
-        snvloc=genlocSNV(numsnv,bam_path,ceil(1/maxAFsnv))
+        snvloc = genlocSNV(numsnv, bam_path, ceil(1/maxAFsnv))
         random.seed(seed)
 
         print("Writing the SNV output file...")
 
         if numsnv > 0:
-            vcfsnv=[
+            vcfsnv = [
                 '##fileformat=VCFv4.2',
                 '##FILTER=<ID=PASS,Description="All filters passed">',
                 '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
                 '##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Read depth for each allele">',
                 '##FORMAT=<ID=DV,Number=1,Type=Integer,Description="Number of variant reads">',
-                '##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">'
+                '##INFO=<ID=AF,Number=A,Type=Float,Description="Target Allele Frequency">',
+                '##INFO=<ID=EAF,Number=A,Type=Float,Description="Exact Allele Frequency (variant reads / total depth)">' # Added EAF
             ]
 
             # Dynamically add contig lines
@@ -299,34 +343,42 @@ def main():
             # Add VCF column headers
             vcfsnv.append('\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE']))
 
-            snps=getrefsnp(ref_path,snvloc)
+            snps = getrefsnp(ref_path, snvloc)
             
+            for i in gensnps(maxsnvl=maxsnvl, sub=sub, snplist=snps):
+                AFnum = round(random.uniform(minAFsnv, maxAFsnv), count_decimals(minAFsnv))
+                cover = i[2]
+                readnum = ceil(AFnum * cover)
+                
+                # Calculate exact AF (prevent division by zero)
+                exact_af = round(readnum / cover, 4) if cover > 0 else 0.0
+                
+                # Converted to an f-string for better readability and added EAF
+                vcfsnv.append(f"{i[0]}\t{i[1]}\t.\t{i[3]}\t{i[4]}\t1500\tPASS\tAF={AFnum};EAF={exact_af}\tGT:AD:DV\t0/0:{cover-readnum}:{readnum}")
             
-            for i in gensnps(maxsnvl=maxsnvl,sub=sub, snplist=snps):
-                AFnum=round(random.uniform(minAFsnv,maxAFsnv),count_decimals(minAFsnv))
-                readnum=ceil(AFnum*i[2])
-                vcfsnv.append(str(i[0])+'\t'+str(i[1])+'\t.\t'+str(i[3])+'\t'+str(i[4])+"\t1500\tPASS\tAF="+str(AFnum)+"\tGT:AD:DV\t0/0:"+str(i[2]-readnum)+":"+str(readnum))
-            with open(SNVvcf,"w") as f:
-                for i in tuple(vcfsnv)[:-1]:
-                    f.write(i+'\n')
-                f.write(tuple(vcfsnv)[-1])
-            f.close()
+            # Updated to use cleaner context manager and string joining
+            with open(SNVvcf, "w") as f:
+                f.write('\n'.join(vcfsnv) + '\n')
 
             print(f"New SNV truth vcf written to {SNVvcf}.")
             
 
     # SV processing
+    # SV processing
     if sv_truth_file is not None:
 
         print(f"Retrieving SVs from truth vcf...")
         svloc = parse_truth_vcf(sv_truth_file)
+        
         vcfsv = [
             '##fileformat=VCFv4.2',
             '##ALT=<ID=INS,Description="Insertion">',
             '##ALT=<ID=DEL,Description="Deletion">',
             '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
             '##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype quality">',
+            '##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">', # Added DP format field
             '##FILTER=<ID=PASS,Description="All filters passed">',
+            '##FILTER=<ID=FAIL,Description="Failed minimum coverage">',
             '##INFO=<ID=PRECISE,Number=0,Type=Flag,Description="Structural variation with precise breakpoints">',
             '##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variation">',
             '##INFO=<ID=SVLEN,Number=1,Type=Integer,Description="Length of structural variation">',
@@ -336,6 +388,10 @@ def main():
         vcfsv.extend([f'##contig=<ID={c},length={l}>' for c, l in chromol.items()])
         vcfsv.append('\t'.join(['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE']))
 
+        # Distinct copy for the failed list and record header length
+        vcfsv_failed = vcfsv.copy()
+        header_len = len(vcfsv)
+
         for idx, record in enumerate(svloc):
             if sv_truth_file:
                 chrom, pos, ref, alt, af = record
@@ -343,19 +399,48 @@ def main():
                 chrom, pos = record
                 ref, alt = 'N', genseq(minsvl, maxsvl) if choice([True, False], p=[insdel, 1-insdel]) else '<DEL>'
                 af = round(random.uniform(minAFsv, maxAFsv), count_decimals(minAFsv))
+                
             pos = str(int(pos) + bp_shift)
+
+            ## Failsafe coverage calculation
+            try:
+                cover = int(depth(bam_path, '-r', chrom + ":" + pos + "-" + pos).rstrip("\n").split("\t")[-1])
+            except ValueError:
+                cover = 0
+            
             svtype = 'INS' if len(alt) > len(ref) else 'DEL'
             svlen = len(alt) - len(ref) if svtype == 'INS' else -(len(ref) - len(alt))
             end = int(pos) + abs(svlen)
             ID = f"SV{idx+1}"
-            vcfsv.append(f"{chrom}\t{pos}\t{ID}\t{ref}\t{alt}\t60\tPASS\tPRECISE;SVTYPE={svtype};SVLEN={svlen};END={end};AF={af}\tGT:GQ\t0/0:60")
 
+            ## Test for minimum coverage requirement
+            if not ignore_minimum_cov and cover < mincov:
+                # Appended GT:GQ:DP format string and included cover
+                vcfsv_failed.append(f"{chrom}\t{pos}\t{ID}\t{ref}\t{alt}\t60\tFAIL\tPRECISE;SVTYPE={svtype};SVLEN={svlen};END={end};AF={af}\tGT:GQ:DP\t0/0:60:{cover}")
+            else:
+                # Appended GT:GQ:DP format string and included cover
+                vcfsv.append(f"{chrom}\t{pos}\t{ID}\t{ref}\t{alt}\t60\tPASS\tPRECISE;SVTYPE={svtype};SVLEN={svlen};END={end};AF={af}\tGT:GQ:DP\t0/0:60:{cover}")
+
+        # --- File Writing Logic ---
+        
         with open(SVvcf, "w") as f:
-            f.write('\n'.join(vcfsv))
+            f.write('\n'.join(vcfsv) + '\n')
 
         print(f"New SV truth vcf written to {SVvcf}.")
-        
 
+        # Check if the failed list has any actual variants
+        if len(vcfsv_failed) > header_len:
+            # Safely replace the .vcf extension
+            if SVvcf.endswith('.vcf'):
+                failed_SVvcf = SVvcf[:-4] + '_failed.vcf'
+            else:
+                failed_SVvcf = SVvcf + '_failed.vcf'
+                
+            with open(failed_SVvcf, "w") as f:
+                f.write('\n'.join(vcfsv_failed) + '\n')
+                
+            num_failed = len(vcfsv_failed) - header_len
+            print(f"Found {num_failed} SVs below minimum coverage. Written to {failed_SVvcf}.")
     else:
         svloc=genlocSV(numsv,bam_path,ceil(1/minAFsv))
         chromol, chrom = get_chrom_lengths(bam_path)
