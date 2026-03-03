@@ -286,6 +286,7 @@ def main():
             pos = int(pos)
             
             ## Test for minimum coverage requirement
+            mincov = ceil(1/maxAFsnv)
             if not ignore_minimum_cov and cover < mincov:
                 # EAF is 0.0 because no variant reads are simulated for failed loci
                 vcfsnv_failed.append(f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t1500\tFAIL\tAF={af_val};EAF=0.0\tGT:AD:DV\t0/0:{cover}:0")
@@ -414,6 +415,7 @@ def main():
             ID = f"SV{idx+1}"
 
             ## Test for minimum coverage requirement
+            mincov = ceil(1/maxAFsv)
             if not ignore_minimum_cov and cover < mincov:
                 # Appended GT:GQ:DP format string and included cover
                 vcfsv_failed.append(f"{chrom}\t{pos}\t{ID}\t{ref}\t{alt}\t60\tFAIL\tPRECISE;SVTYPE={svtype};SVLEN={svlen};END={end};AF={af}\tGT:GQ:DP\t0/0:60:{cover}")
