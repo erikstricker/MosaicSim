@@ -152,7 +152,13 @@ def main(args):
     if args.time_run:
         end_time = time.time()
         print(f"End time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"Total run time: {end_time - start_time:.2f} seconds")
+        
+        total_seconds = end_time - start_time
+        hours = int(total_seconds // 3600)
+        minutes = int((total_seconds % 3600) // 60)
+        seconds = total_seconds % 60
+        
+        print(f"Total run time: {hours:02d}:{minutes:02d}:{seconds:05.2f}")
     
     print("Done.")
 
