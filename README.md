@@ -91,7 +91,7 @@ module load bcftools
 - mosdepth 0.3.2
 - samtools ≥1.17
 - bcftools ≥1.17
-- Python 3.10
+- python 3.10
   
 ### TweakVar
 - pysam 0.21.0
@@ -99,6 +99,7 @@ module load bcftools
 - biopython 1.81
 - samtools ≥1.17
 - bcftools ≥1.17
+- python 3.10
 
 ## Contributers
 
