@@ -51,12 +51,15 @@ def argument_parser():
 
     return parser.parse_args()
 
+
 def vcf_number_variants_bam_out(input_vcf_file, input_bam_file, refs, outfile):
     processed_read_ids = set()
     """Return the number of each variant separately and write output in BAM format."""
     bamfile = pysam.AlignmentFile(input_bam_file, 'rb')
     vcffile = pysam.VariantFile(input_vcf_file, 'r')  # SV or SNV VCF
     bam_out = pysam.AlignmentFile(outfile.replace(".bam", "_pre.bam"), 'wb', header=bamfile.header)  # Output BAM file
+
+    failed_variant_generation = 0 
 
     for v in vcffile:
         var_type = v.info.get('SVTYPE') if 'SVTYPE' in v.info else 'SNV'
@@ -77,16 +80,29 @@ def vcf_number_variants_bam_out(input_vcf_file, input_bam_file, refs, outfile):
             variant_len = 1
             end_position = start_position + variant_len
 
+        print()
         print(f"{chromosome}:{start_position}-{end_position} LEN={variant_len} {variant_seq} AF={variant_af}")
 
+        # Grab all the reads and put them in a list
         variant_reads = []
         for read in bamfile.fetch(chromosome, start_position, end_position):
             if read.query_sequence is not None and read.flag in {0, 16, 99, 147, 83, 163} and read.query_name not in processed_read_ids:
-                variant_reads.append(read)
+                for query_pos, ref_pos in read.get_aligned_pairs(matches_only = False):
+                    if ref_pos == start_position and query_pos is not None:
+                        variant_reads.append(read)
+            else: 
+                failed_variant_generation += 1
 
-        no_reads = max(1, math.ceil(float(len(variant_reads)) * float(v.info.get('AF')[0])))
-        print(no_reads, len(variant_reads))
+        no_reads = round(len(variant_reads) * float(v.info.get('AF')[0]))
+        
+        # Fail safe; shouldn't happen
+        if no_reads == 0:
+            no_reads = 1
+            print("Generated 1 variant at position ", end_position, " because 0 reads could be modified.")
+        print("Number of reads to modify: ", no_reads)
+        print("Number of callable reads:  ", len(variant_reads))
 
+        # Fail safe; should already be taken care in in the simulation
         if no_reads > len(variant_reads):
             print(f"Coverage {len(variant_reads)} is below required minimum reads for variant {chromosome}:{start_position} AF={variant_af}")
             continue
@@ -116,7 +132,7 @@ def vcf_number_variants_bam_out(input_vcf_file, input_bam_file, refs, outfile):
 
             if not read_edited:
                 norm_counter += 1
-                write_bam_record(bam_out, read.query_name, read.query_sequence, read.query_qualities, read.reference_name, read.reference_start, read.cigartuples)
+                #write_bam_record(bam_out, read.query_name, read.query_sequence, read.query_qualities, read.reference_name, read.reference_start, read.cigartuples)
 
         print("mos+&norm", mos_counter, norm_counter)
         if num_reads_edited != no_reads:
@@ -124,7 +140,8 @@ def vcf_number_variants_bam_out(input_vcf_file, input_bam_file, refs, outfile):
 
     bamfile.close()
     vcffile.close()
-    bam_out.close()  # Close output BAM file
+    bam_out.close()
+\
 
     # **Sort and Index the BAM file**
     pysam.sort("-o", outfile, outfile.replace(".bam", "_pre.bam"))
@@ -144,6 +161,7 @@ def vcf_number_variants_fastq_out(input_vcf_file, input_bam_file, refs, outfile)
     vcffile = pysam.VariantFile(input_vcf_file, 'r') # SV or SNV vcf
     
     with open(outfile, 'w') as out_fh:
+        failed_variant_generation = 0
         for v in vcffile:
             var_type = v.info.get('SVTYPE') if 'SVTYPE' in v.info else 'SNV'
             ## does pysam return errors? maybe try & except ##
@@ -182,7 +200,9 @@ def vcf_number_variants_fastq_out(input_vcf_file, input_bam_file, refs, outfile)
                     if read.query_sequence is not None and read.flag == 0 and read.query_name not in processed_read_ids:
                         variant_reads.append(read)
 
-            no_reads = max(1, math.ceil(float(len(variant_reads)) * float(v.info.get('AF')[0])))
+            no_reads = max(1, math.round(float(len(variant_reads)) * float(v.info.get('AF')[0])))
+            if no_reads == 0:
+                no_reads = 1
             print(no_reads, len(variant_reads))
             if no_reads > len(variant_reads):
                 print(f"Coverage {len(variant_reads)} is below required minimum reads for variant {chromosome}:{start_position} AF={variant_af}")
@@ -220,6 +240,7 @@ def vcf_number_variants_fastq_out(input_vcf_file, input_bam_file, refs, outfile)
 
         bamfile.close()
         vcffile.close()
+    
         return
 
         print(f"FastQ file saved as: {out_fh}")
@@ -228,12 +249,6 @@ def vcf_number_variants_fastq_out(input_vcf_file, input_bam_file, refs, outfile)
 def main():
     args=argument_parser()
     refs = read_ref(args.ref_file)
-	# Get the directory name from the file path
-    out_dir = os.path.dirname(args.out_file)
-    
-    # Create the directory if it doesn't exist (and if out_dir is not empty)
-    if out_dir:
-        os.makedirs(out_dir, exist_ok=True)
     output_format = args.output_format
     if args.output_format is None:
         output_format = "bam"
