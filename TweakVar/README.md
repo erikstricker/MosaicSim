@@ -434,8 +434,8 @@ The output of this pipeline is thus a modified BAM and a VCF file which provides
 |<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Joyjit Daw.png" width="150"/><br>Joyjit Daw |<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Michal Bogumil Izydorczyk.png" width="150"/><br>Michal Izydorczyk|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Sontosh K Deb.jpg" width="150"/><br>Sontosh Deb|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Fritz Sedlazeck.jpg" width="150"/><br>Fritz Sedlazeck |<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Alexander Adam.jpg" width="150"/><br>Adam Alexander|
 |:-:|:-:|:-:|:-:|:-:|
 
-|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Divya Kalrai_placeholder.jpg" width="150"/><br>Divya Kalra|
-|<img src="https://github.com/eluna2021/extra/blob/main/EmmaLuna2.png" width="150"/><br>Emma Luna|
+|<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Divya Kalrai_placeholder.jpg" width="150"/><br>Divya Kalra| <img 
+src="https://github.com/eluna2021/extra/blob/main/EmmaLuna2.png" width="150"/><br>Emma Luna|
 |:-:|:-:|
 
 
