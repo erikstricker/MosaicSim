@@ -56,27 +56,34 @@ REPO_ROOT="$HOME/MosaicSim"
 pip install -r $REPO_ROOT/requirements.txt
 ```
 Ensure to also load mosdepth≥0.3.2 (for SpikeVar), samtools ≥1.17, and bcftools≥1.17
+If you are having trouble with the requirement.txt file, install packages individually with pip and conda.
+```
+pip install numpy==1.24.3
+pip install pandas==2.0.1
+pip install pytest
+pip install pysam==0.21
+pip install biopython==1.81
+```
 
 Once the requirements are installed, please install or load the following additional packages. If you work in a cluster with the packages already installed, you can load the path or module directly.
 
 _Installation_
 
 ```
-conda install -c bioconda samtools bcftools mosdepth
+conda install -c bioconda samtools==1.21 bcftools==1.19 mosdepth
 ```
-
-_Loading (e.g.)_
+Note: mosdepth not required for TweakVar.
+If there are issues installing bcftools, update the libzlib package
 ```
-export PATH=/path/to/software/mosdepth/mosdepth-0.3.2/bin:$PATH
-export PATH=/path/to/software/samtools/samtools-1.17/bin:$PATH
-export PATH=/path/to/software/bcftools/bcftools-1.17/bin:$PATH
+conda install -c conda-forge libzlib==1.2.13
 ```
-or
+_Loading modules_
 ```
 module load mosdepth
 module load samtools
 module load bcftools
 ```
+
 
 ## Dependencies
 
@@ -87,7 +94,7 @@ module load bcftools
 - Python 3.10
   
 ### TweakVar
-- pysam 0.21.0)
+- pysam 0.21.0
 - numpy ≥1.24.3
 - biopython 1.81
 - samtools ≥1.17
@@ -102,8 +109,8 @@ module load bcftools
 |<img src="images/Joyjit Daw.png" width="150"/><br>Joyjit Daw |<img src="images/Michal Bogumil Izydorczyk.png" width="150"/><br>Michal Izydorczyk|<img src="images/Sontosh K Deb.jpg" width="150"/><br>Sontosh Deb|<img src="images/Fritz Sedlazeck.jpg" width="150"/><br>Fritz Sedlazeck |<img src="images/Alexander Adam.jpg" width="150"/><br>Adam Alexander|
 |:-:|:-:|:-:|:-:|:-:|
 
-|<img src="images/Divya Kalrai_placeholder.jpg" width="150"/><br>Divya Kalra|
-|:-:|
+|<img src="images/Divya Kalrai_placeholder.jpg" width="150"/><br>Divya Kalra|<img src="https://github.com/erikstricker/MosaicSim/blob/main/images/EmmaLuna.png" width="150"/><br>Emma Luna|
+|:-:|:-:|
 
 
 ## References
