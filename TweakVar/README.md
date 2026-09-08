@@ -51,24 +51,26 @@ git clone https://github.com/erikstricker/MosaicSim.git
 
 To install the relevant python dependencies, run
 ```
-REPO_ROOT="$HOME/MosaicSim"
-
-pip install -r $REPO_ROOT/requirements.txt
+pip install numpy==1.24.3
+pip install pandas==2.0.1
+pip install pytest
+pip install pysam==0.21
+pip install biopython==1.81
 ```
-Ensure to also load samtools ≥1.17, and bcftools≥1.17
+Note: Do not download requirements via the requirements.txt documents. truvari is not required for running TweakVar pipeline.
+
 
 Once the requirements are installed, please install or load the following additional packages. If you work in a cluster with the packages already installed, you can load the path or module directly.
 
 _Installation_
 ```
-conda install -c bioconda samtools bcftools
+conda install -c bioconda samtools==1.21 bcftools==1.19
 ```
-_Loading (e.g.)_
+If there are issues installing bcftools, update the libzlib package
 ```
-export PATH=/path/to/software/samtools/samtools-1.17/bin:$PATH
-export PATH=/path/to/software/bcftools/bcftools-1.17/bin:$PATH
+conda install -c conda-forge libzlib==1.2.13
 ```
-or
+Alternatively, you may also load these modules if they're already installed on a cluster. 
 ```
 module load samtools
 module load bcftools
@@ -77,7 +79,7 @@ module load bcftools
 ## Dependencies
   
 ### TweakVar
-- pysam 0.21.0)
+- pysam 0.21.0
 - numpy ≥1.24.3
 - biopython 1.81
 - samtools ≥1.17
@@ -108,13 +110,13 @@ The output is a **VCF file in Sniffles format**, which serves as:
 
 ##### Usage
 ```bash
-python tweakvarsimulator.py -i <path_to_bam> -T <path_to_ref> -o <output_path_prefix> [optional arguments]
+python tweakvarsimulator.py -i <path_to_bam / .txt file of bam paths> -T <path_to_ref> -o <output_path_prefix> [optional arguments]
 ```
 
 ##### Required Parameters  
 | Parameter | Description |
 |-----------|-------------|
-| `-i, --input` | Path to the **input BAM file** containing sequencing reads. |
+| `-i, --input` | Path to the **input BAM file(s)** containing sequencing reads. This is either a **.bam** file or a **.txt** file listing the paths to multiple BAM files. |
 | `-T, --reference` | Path to the **reference genome FASTA file**. |
 | `-o, --output` | Prefix for the **output files** (e.g., VCF files for simulated SNVs and SVs). |
 
@@ -124,8 +126,9 @@ python tweakvarsimulator.py -i <path_to_bam> -T <path_to_ref> -o <output_path_pr
 | `-s, --seed` | **Random seed** for reproducibility. If not set, the results will vary between runs. The same seed with different input but identical parameters will lead to the same list of loci. | `0` |
 | `-minAFsv, --minimum_allele_frequency_sv` | **Minimum allele frequency** for simulated **structural variants (SVs)**. | `0.01` |
 | `-maxAFsv, --maximum_allele_frequency_sv` | **Maximum allele frequency** for **SVs**. | `0.05` |
-| `-minAFsnv, --minimum_allele_frequency_snv` | **Minimum allele frequency** for **single nucleotide variants (SNVs)**. | `0.01` |
-| `-maxAFsnv, --maximum_allele_frequency_snv` | **Maximum allele frequency** for **SNVs**. | `0.05` |
+| `-minAFsnv, --minimum_allele_frequency_snv` | **Minimum allele frequency** for **single nucleotide variants (SNVs)**. Minimum allele frequency to output to a VCF file given a VCF file as input. | `0.01` |
+| `-maxAFsnv, --maximum_allele_frequency_snv` | **Maximum allele frequency** for **SNVs**. Maximum allele frequency to output to a VCF file given a VCF file as input. | `0.05` |
+| `-snv_align, --number_of_snvs_to_align` | **Number of SNVs to align in the output VCF** when using a truth VCF file as input. | `Number of SNVs in the input VCF file` |
 | `-numsv, --number_of_svs` | Number of **structural variants (SVs)** to simulate. | `50` |
 | `-numsnv, --number_of_snvs` | Number of **single nucleotide variants (SNVs)** to simulate. | `200` |
 | `-minsvl, --minimum_sv_length` | **Minimum length** of simulated **SVs** (in base pairs). | `50` |
@@ -146,7 +149,7 @@ python tweakvarsimulator.py -i <path_to_bam> -T <path_to_ref> -o <output_path_pr
 This command above takes in the VCF which determines which variants to introduce into the reads.
 The BAM file is used to find the reads which overlap with variant locations. Only a subset of the reads
 corresponding to a particular variant location are edited. This is determined by the allele frequency.
-The output BAM file retains the alignment info and now contains the edited reads. Also, the query name of each read is kept the same.
+The output BAM file retains the alignment info and contains only the edited reads. Also, the query name of each read is kept the same. This BAM file can be viewed in programs such as Interactive Genomics Viewer (IGV) to ensure variants were simulated properly.
 
 ##### Usage
 ```bash
@@ -235,39 +238,58 @@ samtools view -b $HOME/mosaicsim_files/data/HG002.GRCh38.2x250.bam chr22 \
 samtools index $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam
 ```
 
-
+## Example Usage
 #### 1) TweakVarSimulator - Generate Variants and Modified Reads
 
-Then we simulate variants
-
-## Example Usage
 ```bash
-module load anaconda3/2024.02
+module load anaconda3
 module load python
 conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
+
+# if you have not already, create a directory for your results for this chromosome
+mkdir -p $HOME/results/chr22_HG0002_srWGS_test
+
 python TweakVar/tweakvarsimulator.py \
  -i $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam \
  -T $HOME/mosaicsim_files/data/ref/GRCh38_masked_v2_decoy_gene.fasta \
  -o $HOME/results/chr22_HG0002_srWGS_test/chr22.HG002.GRCh38.2x250_MAF0.01-0.05 \
  -s 0 -numsv 5 -numsnv 100
 ```
-
 This command:  
 - Uses `chr22.HG002.GRCh38.2x250.bam` as input and `GRCh38_masked_v2_decoy_gene.fasta` as the reference genome.  
-- Outputs simulated VCFs to `test_output_dir/chr22`.  
-- Sets a **random seed of 0** for reproducibility.  
+- Outputs simulated VCFs to `$HOME/results/chr22_HG0002_srWGS_test/`.  
+- Sets a **random seed of 0** for reproducibility.
+- Generates 5 SVs and 100 SNVs
 
-#### 2) TweakVarEditor - Add Modified Reads Back In
-
-Generate a set of modified reads with inserted variants.
-```
-module load anaconda3/2024.02
+You may also choose to simulate multiple VCF files from different BAM files with variants simulated in the same positions across multiple files. This input option will ignore the output prefix and generate VCF files according to the paths of each BAM file. Please note that the -o parameter is still required for the simulator to run.
+```bash
+module load anaconda3
 module load python
 conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
+
+python TweakVar/tweakvarsimulator.py \
+ -i $HOME/mosaicsim_files/data/text_file_of_bam_paths.txt \
+ -T $HOME/mosaicsim_files/data/ref/GRCh38_masked_v2_decoy_gene.fasta \
+ -o $HOME/mosaicsim_files/data/random_prefix_that_will_be_ignored \
+ -s 0 -numsv 5 -numsnv 100
+```
+
+**Please Note**: If you run either of these commands multiple times, there will be multiple VCF files generated with the extension "_2.vcf", "_3.vcf", and so on. Please be sure to alter the file path when using the TweakVarEditor if you have multiple VCF files.
+
+#### 2) TweakVarEditor - Add Modified Reads Back In
+
+Generate a set of modified reads with inserted variants. Only run the module loads if the terminal has been restarted.
+```
+module load anaconda3
+module load python
+conda activate MosaicSim
+module unload python
+cd $HOME/MosaicSim
+
 python  TweakVar/tweakvareditor.py \
  -v $HOME/results/chr22_HG0002_srWGS_test/chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.vcf \
  -b $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam \
@@ -276,13 +298,14 @@ python  TweakVar/tweakvareditor.py \
  -of "bam"
 ```
 
-The modified reads can also be generated as an unmapped FASTQ file to simulate potential mapping error that could arise:
+The modified reads can also be generated as an unmapped FASTQ file to simulate potential mapping error that could arise. Only run the module loads if the terminal has been restarted.
 ```
-module load anaconda3/2024.02
+module load anaconda3
 module load python
 conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
+
 python  TweakVar/tweakvareditor.py \
  -v $HOME/results/chr22_HG0002_srWGS_test/chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.vcf \
  -b $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam \
@@ -293,13 +316,14 @@ python  TweakVar/tweakvareditor.py \
 
 #### 3) TweakVarMerger - Re-Align Modified Reads and Merge Them
 
-Once the new reads are generated in BAM format, we then remove the old alignments with the same IDs of modified reads in the original BAM file, then insert the new alignments of modified reads back into this BAM file.
+Once the new reads are generated in BAM format, we then remove the old alignments with the same IDs of modified reads in the original BAM file, then insert the new alignments of modified reads back into this BAM file. Only run the module loads if the terminal has been restarted.
 ```
-module load anaconda3/2024.02
+module load anaconda3
 module load python
 conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
+
 python  TweakVar/tweakvarmerger.py \
  -b $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam \
  -m $HOME/results/chr22_HG0002_srWGS_test/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.bam \
@@ -360,6 +384,7 @@ module load python
 conda activate MosaicSim
 module unload python
 cd $HOME/MosaicSim
+
 python  scripts/tweakvarmerger.py \
  -b $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam \
  -m $HOME/results/chr22_HG0002_srWGS_test/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq.bam \
@@ -395,8 +420,8 @@ Below are 2 of several variants that overlapped between the ground truth and cal
 The TweakVar workflow produces a modified aligned sequence file in .bam format. This file contains modified reads simulating randomly positioned mosaic variants with user-defined VAF in random locations and is accompanied by a .vcf file containing the locations of the simulated mosaic variants with user-defined VAF. 
 
 The TweakVar workflow can be broadly split into 3 parts: 
-1) The TweakVarSimulator takes an aligned BAM, a reference, and several parameters such as range of VAF, variant sizes, etc. to generate a set of simulated mosaic SV and SNVs. It does so by choosing a random location and VAF from the given range and then evaluating whether that location has sufficient coverage for the desired VAF. If that condition is met, that variant is added to the output VCF. 
-2) The TweakVarEditor is responsible for inserting the simulated variants into the query sequences from the original dataset to generate modified reads with the mosaic variants built-in. The TweakVarEditor accepts a BAM, reference and the simulated VCF file as an input. Then for each variant, it fetches the overlapping reads from the BAM file, subsamples the reads to get the coverage that satisfies the desired VAF, and traverses the cigar string, query and reference sequences for each alignment to find the exact location to insert the variant. Once a modified read is created, it is written out into a FASTQ file. Note that for all new bases (SNVs or inserts), a q-score of 60 is chosen. The parsing and traversing of VCF, BAM and reference files are performed using APIs from pysam, biopython.SeqIO and numpy.
+1) The TweakVarSimulator takes an aligned BAM, a reference, and several parameters such as range of VAF, variant sizes, etc. to generate a set of simulated mosaic SV and SNVs. It does so by choosing a random location and VAF from the given range and then evaluating whether that location has sufficient coverage for the desired VAF. If that condition is met, that variant is added to the output VCF. Alternatively, if the program is provided with a .txt file as input, all BAM files are checked that they meet the minimum coverage for the randomized VAF and location. If the coverage does not meet the minimum coverage requirement for at least one file, the VAF is rerolled until a frequency is chosen that satisfies the coverage requirement. If there are no VAFs that are acceptable, a new location is randomized and the process repeats.
+2) The TweakVarEditor is responsible for inserting the simulated variants into the query sequences from the original dataset to generate modified reads with the mosaic variants built-in. The TweakVarEditor accepts a BAM, reference and the simulated VCF file as an input. Then for each variant, it fetches the overlapping reads from the BAM file, subsamples the reads to get the coverage that satisfies the desired VAF, and traverses the cigar string, query and reference sequences for each alignment to find the exact location to insert the variant. Once a modified read is created, it is written out into a FASTQ or BAM file. Note that for all new bases (SNVs or inserts), a q-score of 60 is chosen. The parsing and traversing of VCF, BAM and reference files are performed using APIs from pysam, biopython.SeqIO and numpy.
 3) The TweakVarMerger re-introduces the modified reads into the original dataset. It does so by first removing the modified read ids from the input BAM to create a filtered BAM. Then the modified reads are aligned against the reference, and merged with the filtered BAM. The end result is a BAM with the same set of read ids as the original dataset, except with some reads modified to contain the mosaic variants. 
 The output of this pipeline is thus a modified BAM and a VCF file which provides the truth set for the mosaic variants.
 
@@ -410,7 +435,8 @@ The output of this pipeline is thus a modified BAM and a VCF file which provides
 |:-:|:-:|:-:|:-:|:-:|
 
 |<img src="https://github.com/erikstricker/MosaicSim/blob/93ae22dd82122271b36fc1b585e283c59a3f4795/images/Divya Kalrai_placeholder.jpg" width="150"/><br>Divya Kalra|
-|:-:|
+|<img src="https://github.com/eluna2021/extra/blob/main/EmmaLuna2.png" width="150"/><br>Emma Luna|
+|:-:|:-:|
 
 
 ## References
