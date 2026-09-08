@@ -70,7 +70,7 @@ If there are issues installing bcftools, update the libzlib package
 ```
 conda install -c conda-forge libzlib==1.2.13
 ```
-Alternatively, you may also load these modules if they're already installed on a cluster. 
+_Loading modules_
 ```
 module load samtools
 module load bcftools
