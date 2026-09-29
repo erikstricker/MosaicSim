@@ -68,7 +68,7 @@ Once the requirements are installed, please install or load the following additi
 
 _Installation_
 ```
-conda install -c bioconda samtools==1.21 bcftools==1.19
+conda install -c conda-forge -c bioconda samtools=1.21 bcftools=1.19
 ```
 If there are issues installing bcftools, update the libzlib package
 ```
