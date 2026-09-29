@@ -53,8 +53,13 @@ To install the relevant python dependencies, run
 pip install numpy==1.24.3
 pip install pandas==2.0.1
 pip install pytest
-pip install pysam==0.21
 pip install biopython==1.81
+pip install pysam==0.21
+```
+Note: Sometimes pysam installation can give troubles. We recommend the following step for that:
+```
+pip install "setuptools<81" "cython<3" wheel
+pip install --no-build-isolation pysam==0.21
 ```
 Note: Do not download requirements via the requirements.txt documents. truvari is not required for running TweakVar pipeline.
 
