@@ -34,7 +34,6 @@ module load python
 Installing two conda environments with python 3.10
 ```
 conda create -n MosaicSim python=3.10
-conda init
 conda activate MosaicSim
 ```
 
