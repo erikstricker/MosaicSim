@@ -226,14 +226,14 @@ wget -P $HOME/mosaicsim_files/data https://ftp-trace.ncbi.nlm.nih.gov/ReferenceS
 Reference
 ```
 mkdir $HOME/mosaicsim_files/data/ref ##or your data folder
-wget -P $HOME/mosaicsim_files/data/ref https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/references/GRCh38/GRCh38_masked_v2_decoy_gene.fasta.gz 
+wget -P $HOME/mosaicsim_files/data/ref https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GRCh38_major_release_seqs_for_alignment_pipelines/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna.gz
 ```
 
 
 Then, we decompress the FASTA file.
 ```
-gunzip $HOME/data/ref/GRCh38_masked_v2_decoy_gene.fasta.gz 
-samtools faidx $HOME/data/ref/GRCh38_masked_v2_decoy_gene.fasta
+gunzip $HOME/data/ref/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna.gz 
+samtools faidx $HOME/data/ref/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna
 ```
 
 We run the demonstration on chr22 only, to reduce the size of the input files and run times for this tutorial. Therefore, we filter the input for the smallest human chromosome (chr22) first.
@@ -258,7 +258,7 @@ mkdir -p $HOME/results/chr22_HG0002_srWGS_test
 
 python TweakVar/tweakvarsimulator.py \
  -i $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam \
- -T $HOME/mosaicsim_files/data/ref/GRCh38_masked_v2_decoy_gene.fasta \
+ -T $HOME/mosaicsim_files/data/ref/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna \
  -o $HOME/results/chr22_HG0002_srWGS_test/chr22.HG002.GRCh38.2x250_MAF0.01-0.05 \
  -s 0 -numsv 5 -numsnv 100
 ```
