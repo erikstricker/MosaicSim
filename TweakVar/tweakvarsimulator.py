@@ -210,7 +210,9 @@ def genlocSNV(num, bam_paths, mincov=20):
         
         while True:
             ranchrom = nran.choice(chrom)
-            loc_int = nran.randint(0, chromol[ranchrom]) + bp_shift
+            loc_int = nran.randint(1, chromol[ranchrom] + 1) + bp_shift
+            if loc_int < 1 or loc_int > chromol[ranchrom]:
+                continue
             loc = str(loc_int)
             
             # Fetch the reference base
@@ -252,7 +254,7 @@ def genlocSV(num, bam_paths, mincov=20):
         print(f"Creating SV {i+1}/{num}...")
         while True:
             ranchrom = nran.choice(chrom)
-            loc = str(nran.randint(0, chromol[ranchrom]) + bp_shift)
+            loc = str(nran.randint(1, chromol[ranchrom] + 1) + bp_shift)
             
             # Check for overlapping/nearby SVs 
             # (Changed loop variable from 'i' to 'existing' to avoid overwriting the outer loop variable)
