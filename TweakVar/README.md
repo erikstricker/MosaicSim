@@ -232,8 +232,9 @@ wget -P $HOME/mosaicsim_files/data/ref https://ftp.ncbi.nlm.nih.gov/genomes/all/
 
 Then, we decompress the FASTA file.
 ```
-gunzip $HOME/data/ref/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna.gz 
-samtools faidx $HOME/data/ref/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna
+gunzip $HOME/data/ref/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna.gz
+mv $HOME/data/ref/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna $HOME/data/ref/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fa
+samtools faidx $HOME/data/ref/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fa
 ```
 
 We run the demonstration on chr22 only, to reduce the size of the input files and run times for this tutorial. Therefore, we filter the input for the smallest human chromosome (chr22) first.
@@ -258,7 +259,7 @@ mkdir -p $HOME/results/chr22_HG0002_srWGS_test
 
 python TweakVar/tweakvarsimulator.py \
  -i $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam \
- -T $HOME/mosaicsim_files/data/ref/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna \
+ -T $HOME/mosaicsim_files/data/ref/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fa \
  -o $HOME/results/chr22_HG0002_srWGS_test/chr22.HG002.GRCh38.2x250_MAF0.01-0.05 \
  -s 0 -numsv 5 -numsnv 100
 ```
@@ -278,7 +279,7 @@ cd $HOME/MosaicSim
 
 python TweakVar/tweakvarsimulator.py \
  -i $HOME/mosaicsim_files/data/text_file_of_bam_paths.txt \
- -T $HOME/mosaicsim_files/data/ref/GRCh38_masked_v2_decoy_gene.fasta \
+ -T $HOME/mosaicsim_files/data/ref/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fa \
  -o $HOME/mosaicsim_files/data/random_prefix_that_will_be_ignored \
  -s 0 -numsv 5 -numsnv 100
 ```
@@ -298,7 +299,7 @@ cd $HOME/MosaicSim
 python  TweakVar/tweakvareditor.py \
  -v $HOME/results/chr22_HG0002_srWGS_test/chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.vcf \
  -b $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam \
- -T $HOME/mosaicsim_files/data/ref/GRCh38_masked_v2_decoy_gene.fasta  \
+ -T $HOME/mosaicsim_files/data/ref/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fa  \
  -o $HOME/results/chr22_HG0002_srWGS_test/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.bam \
  -of "bam"
 ```
@@ -314,7 +315,7 @@ cd $HOME/MosaicSim
 python  TweakVar/tweakvareditor.py \
  -v $HOME/results/chr22_HG0002_srWGS_test/chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.vcf \
  -b $HOME/mosaicsim_files/data/chr22.HG002.GRCh38.2x250.bam \
- -T $HOME/mosaicsim_files/data/ref/GRCh38_masked_v2_decoy_gene.fasta  \
+ -T $HOME/mosaicsim_files/data/ref/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fa  \
  -o $HOME/results/chr22_HG0002_srWGS_test/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq \
  -of "fastq"
 ```
@@ -341,7 +342,7 @@ We can use `minimap2` for both short-read and long-read alignment. In the exampl
 ```
 input_fastq="$HOME/results/chr22_HG0002_srWGS_test/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq"
 output_bam="$HOME/results/chr22_HG0002_srWGS_test/output_SNV_chr22.HG002.GRCh38.2x250_MAF0.01-0.05_SNV.fastq.bam"
-reference="$HOME/mosaicsim_files/data/ref/GRCh38_masked_v2_decoy_gene.fasta"
+reference="$HOME/mosaicsim_files/data/ref/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fa"
 ```
 Choose the alignment setting that best fits your needs: 
 ***short read - standard***
